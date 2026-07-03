@@ -768,12 +768,14 @@ function renderProjectDetail(project) {
 
       <div class="song-list" id="selected-songs-list"></div>
 
-      <div style="display:flex; gap:8px; margin-top:14px;">
-        <button class="btn btn-secondary" id="copy-social-btn" style="flex:1;">
-          ${ICONS.copy} 複製社群文字
+      <div class="btn-action-row">
+        <button class="btn btn-secondary btn-action" id="copy-social-btn">
+          ${ICONS.copy}
+          <span>複製社群文字</span>
         </button>
-        <button class="btn btn-spotify" id="add-to-spotify-btn" style="flex:1;">
-          ${spotifyLogoSVG()} 加入Spotify播放清單
+        <button class="btn btn-spotify btn-action" id="add-to-spotify-btn">
+          ${spotifyLogoSVG()}
+          <span>加入Spotify<br>播放清單</span>
         </button>
       </div>
     </div>
