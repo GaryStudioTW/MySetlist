@@ -187,9 +187,16 @@ async function spotifyFetch(path, options = {}) {
   return res;
 }
 
+// 從 Spotify 錯誤回應中取出實際的錯誤訊息，避免把根本原因（權限不足、token 失效等）蓋掉
+async function spotifyErrorMessage(res, fallback) {
+  const body = await res.json().catch(() => null);
+  const detail = body?.error?.message;
+  return detail ? `${fallback}（${res.status} ${detail}）` : `${fallback}（${res.status}）`;
+}
+
 export async function getSpotifyProfile() {
   const res = await spotifyFetch("/me");
-  if (!res.ok) throw new Error("無法取得 Spotify 帳號資訊");
+  if (!res.ok) throw new Error(await spotifyErrorMessage(res, "無法取得 Spotify 帳號資訊"));
   return res.json();
 }
 
@@ -197,7 +204,7 @@ export async function searchSpotifyTracks(query, limit = 20) {
   if (!query.trim()) return [];
   const q = encodeURIComponent(query);
   const res = await spotifyFetch(`/search?q=${q}&type=track&limit=${limit}`);
-  if (!res.ok) throw new Error("Spotify 搜尋失敗");
+  if (!res.ok) throw new Error(await spotifyErrorMessage(res, "Spotify 搜尋失敗"));
   const data = await res.json();
   return (data.tracks?.items || []).map((t) => ({
     id: t.id,
@@ -218,7 +225,7 @@ export async function getUserPlaylists() {
   let path = "/me/playlists?limit=50";
   while (path) {
     const res = await spotifyFetch(path);
-    if (!res.ok) throw new Error("無法取得播放清單");
+    if (!res.ok) throw new Error(await spotifyErrorMessage(res, "無法取得播放清單"));
     const data = await res.json();
     items = items.concat(data.items || []);
     path = data.next ? data.next.replace("https://api.spotify.com/v1", "") : null;

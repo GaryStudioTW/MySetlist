@@ -1005,7 +1005,9 @@ async function initSongBrowser() {
     } catch (err) {
       if (seq !== spotifySearchSeq || activeTab !== "spotify" || !editorState) return;
       console.error(err);
-      browseArea.innerHTML = `<p style="font-size:12px; color:var(--danger); padding:8px 0;">Spotify 搜尋失敗，請確認連線或重新連接帳號</p>`;
+      browseArea.innerHTML = `<p style="font-size:12px; color:var(--danger); padding:8px 0;">${escapeHTML(
+        err.message || "Spotify 搜尋失敗，請確認連線或重新連接帳號"
+      )}</p>`;
     }
   }
 
@@ -1104,7 +1106,9 @@ async function openAddToSpotifyModal() {
     });
   } catch (err) {
     console.error(err);
-    bodyEl.innerHTML = `<p style="font-size:13px; color:var(--danger);">無法取得播放清單，請確認 Spotify 連接狀態</p>`;
+    bodyEl.innerHTML = `<p style="font-size:13px; color:var(--danger);">${escapeHTML(
+      err.message || "無法取得播放清單，請確認 Spotify 連接狀態"
+    )}</p>`;
   }
 }
 
@@ -1385,7 +1389,7 @@ async function loadSpotifyProfileIntoCard() {
   } catch (err) {
     console.error(err);
     const line = document.getElementById("spotify-profile-line");
-    if (line) line.textContent = "無法取得帳號資訊，請確認連線或重新連接";
+    if (line) line.textContent = err.message || "無法取得帳號資訊，請確認連線或重新連接";
   }
 }
 
