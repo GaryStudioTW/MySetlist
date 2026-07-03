@@ -1064,10 +1064,19 @@ async function initSongBrowser() {
   doOfflineSearch("");
 }
 
+// 離線歌曲庫用的專輯名稱有時跟 Spotify 官方上架名稱完全不同（例如翻譯名 vs 原文
+// 名，兩者沒有共同字元，任何模糊比對演算法都救不回來），只能手動維護對照表。
+// 目前已確認的案例：離線資料庫的「Let's Go!」在 Spotify 上是用原文專輯名「衝啦!」
+// 上架。之後若還有歌曲配對錯誤且原因是專輯譯名不同，把新的一組加進這裡即可
+const ALBUM_NAME_OVERRIDES = {
+  "let's go!": "衝啦!",
+};
+
 // 離線歌曲庫的 section 是「編號.專輯名」格式（例如「01.Let's Go!」），
-// 拿去跟 Spotify 比對前先去掉編號前綴，只留下比較接近真實專輯名稱的部分
+// 拿去跟 Spotify 比對前先去掉編號前綴，並套用上面的專輯名稱對照表
 function cleanAlbumHint(section) {
-  return (section || "").replace(/^\d+\.\s*/, "").trim();
+  const cleaned = (section || "").replace(/^\d+\.\s*/, "").trim();
+  return ALBUM_NAME_OVERRIDES[cleaned.toLowerCase()] || cleaned;
 }
 
 function addSongToSetlist(songDbEntry) {

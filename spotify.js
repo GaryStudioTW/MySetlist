@@ -220,43 +220,44 @@ export async function searchSpotifyTracks(query, limit = 10) {
   });
 }
 
-// 去除標點符號、空白後轉小寫再比對是否互相包含，避免專輯名稱因為標點、副標題
-// 等細微差異（例如「Let's Go!」vs「Let's Go」）就完全比對不到
+// 去除標點符號、空白後轉小寫再比對是否互相包含，避免歌名／專輯名稱因為標點、
+// 括號、副標題等細微差異（例如彎引號 vs 直引號）就完全比對不到
 function normalizeForCompare(str) {
   return (str || "")
     .toLowerCase()
     .replace(/[^\p{L}\p{N}]/gu, "");
 }
 
-function albumHintMatches(candidateAlbum, hint) {
-  const a = normalizeForCompare(candidateAlbum);
-  const b = normalizeForCompare(hint);
-  if (!a || !b) return false;
-  return a.includes(b) || b.includes(a);
+function looseMatch(a, b) {
+  const na = normalizeForCompare(a);
+  const nb = normalizeForCompare(b);
+  if (!na || !nb) return false;
+  return na === nb || na.includes(nb) || nb.includes(na);
 }
 
-// 從候選清單中挑出專輯名稱跟提示最相符的一筆，找不到就用排名最前面的當退路
-function pickBestByAlbum(candidates, album) {
+// 從候選清單中挑出最合適的一筆：
+// 1. 先篩出「歌名」寬鬆比對得上的候選（避免抓到完全不同的歌）
+// 2. 若提供專輯提示，優先在這些候選中找專輯也對得上的（避開精選輯／重新收錄版）
+// 3. 都對不上就退回篩選後的第一筆，完全沒有歌名相符的候選才用原始排序第一筆
+function pickBestMatch(candidates, songName, album) {
   if (!candidates.length) return null;
+  const nameMatched = candidates.filter((c) => looseMatch(c.name, songName));
+  const pool = nameMatched.length ? nameMatched : candidates;
   if (album && album.trim()) {
-    const matched = candidates.find((c) => albumHintMatches(c.album, album));
-    if (matched) return matched;
+    const albumMatched = pool.find((c) => looseMatch(c.album, album));
+    if (albumMatched) return albumMatched;
   }
-  return candidates[0];
+  return pool[0];
 }
 
-// 純用歌名搜尋很容易配對到同名但不同樂團的歌曲；就算加上歌手名，Spotify 的排序
-// 也常常把精選輯、重新收錄版排在原始專輯前面。因此改成：用歌手+歌曲抓多筆候選，
-// 自己依專輯名稱（寬鬆比對）從候選中挑出最符合的一筆，抓不到候選時才逐步放寬
+// 不用 track:/artist: 這類精確欄位篩選（太容易因為標點、譯名差異就直接比對不到、
+// 完全沒有候選可挑），改用單純的關鍵字搜尋抓多筆候選回來，交給前端自己用寬鬆
+// 比對挑出歌名、專輯都最相符的一筆
 export async function findBestTrackMatch(songName, artist, album) {
   if (artist && artist.trim()) {
-    const filtered = await searchSpotifyTracks(`track:"${songName}" artist:"${artist}"`, 10);
-    const filteredPick = pickBestByAlbum(filtered, album);
-    if (filteredPick) return filteredPick;
-
-    const loose = await searchSpotifyTracks(`${artist} ${songName}`, 10);
-    const loosePick = pickBestByAlbum(loose, album);
-    if (loosePick) return loosePick;
+    const candidates = await searchSpotifyTracks(`${artist} ${songName}`, 10);
+    const pick = pickBestMatch(candidates, songName, album);
+    if (pick) return pick;
   }
   const results = await searchSpotifyTracks(songName, 1);
   return results[0] || null;
