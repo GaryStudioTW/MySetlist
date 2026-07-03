@@ -225,7 +225,7 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .btn-action span {
   font-size: 14px;
   line-height: 1.3;
-  text-align: left;
+  text-align: center;
 }
 
 .btn-action svg,

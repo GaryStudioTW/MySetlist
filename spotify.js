@@ -220,7 +220,16 @@ export async function searchSpotifyTracks(query, limit = 10) {
   });
 }
 
-export async function findBestTrackMatch(songName) {
+// 純用歌名搜尋很容易配對到同名但不同樂團的歌曲，若有樂團名稱可用就優先用
+// 精確欄位搜尋（track/artist）縮小範圍，找不到再退回寬鬆比對，最後才退回純歌名
+export async function findBestTrackMatch(songName, artist) {
+  if (artist && artist.trim()) {
+    const filtered = await searchSpotifyTracks(`track:"${songName}" artist:"${artist}"`, 1);
+    if (filtered[0]) return filtered[0];
+
+    const loose = await searchSpotifyTracks(`${artist} ${songName}`, 1);
+    if (loose[0]) return loose[0];
+  }
   const results = await searchSpotifyTracks(songName, 1);
   return results[0] || null;
 }

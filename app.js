@@ -715,6 +715,7 @@ function renderProjectDetail(project) {
   let keyCounter = 0;
   editorState = {
     projectId: project.id,
+    band: project.band || "",
     songs: (project.songs || []).map((s) => ({ ...s, key: keyCounter++ })),
     nextKey: () => keyCounter++,
   };
@@ -905,6 +906,10 @@ async function initSongBrowser() {
         "toggle",
         () => {
           if (!detailsEl.open) return;
+          // 一次只展開一個專輯，開啟新的就自動收合其他已展開的
+          browseArea.querySelectorAll(".album-group").forEach((other) => {
+            if (other !== detailsEl && other.open) other.open = false;
+          });
           const body = detailsEl.querySelector(".album-group-body");
           if (body.dataset.rendered) return;
           const section = body.dataset.section;
@@ -1079,7 +1084,7 @@ function addSongToSetlist(songDbEntry) {
 async function matchOfflineSongWithSpotify(targetEditorState, key, songName) {
   if (!isSpotifyConnected()) return;
   try {
-    const match = await findBestTrackMatch(songName);
+    const match = await findBestTrackMatch(songName, targetEditorState.band);
     if (!match || editorState !== targetEditorState) return;
     const song = editorState.songs.find((s) => s.key === key);
     if (!song || isMarker(song)) return;
@@ -1248,7 +1253,7 @@ async function runAddToSpotifyPlaylist(playlistId, bodyEl, close) {
       if (s.spotifyUri) {
         uris.push(s.spotifyUri);
       } else {
-        const match = await findBestTrackMatch(s.name);
+        const match = await findBestTrackMatch(s.name, editorState.band);
         if (match) uris.push(match.uri);
         else unmatched++;
       }
