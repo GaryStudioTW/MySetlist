@@ -1,0 +1,19 @@
+// ============================================================================
+// Firestore 安全規則
+// 用途：確保每個使用者只能讀寫自己帳號底下的資料，別人無法存取你的歌單
+//
+// 使用方式：
+// 1. 到 Firebase 主控台 → 你的專案 → Firestore Database → 「規則」分頁
+// 2. 把下面這段規則整段貼上，取代原本的內容
+// 3. 點「發布」
+// ============================================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
