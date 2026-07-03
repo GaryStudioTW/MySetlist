@@ -17,6 +17,8 @@ import {
   collection,
   doc,
   addDoc,
+  updateDoc,
+  getDoc,
   onSnapshot,
   query,
   orderBy,
@@ -71,6 +73,7 @@ const ICONS = {
   arrowLeft: `<svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>`,
   music: `<svg class="icon" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
   logout: `<svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>`,
+  close: `<svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>`,
 };
 
 function googleLogoSVG() {
@@ -104,14 +107,27 @@ function h(strings, ...values) {
   return strings.reduce((acc, s, i) => acc + s + (values[i] ?? ""), "");
 }
 
+// 專案名稱「自動組合」/「自訂插入」可用的變數清單
+const NAME_VARS = [
+  { key: "date", label: "日期", getValue: (f) => fmtDate(f.date) },
+  { key: "band", label: "樂團", getValue: (f) => f.band || "" },
+  { key: "eventName", label: "活動名稱", getValue: (f) => f.eventName || "" },
+  { key: "location", label: "地點", getValue: (f) => f.location || "" },
+  {
+    key: "tags",
+    label: "標籤",
+    getValue: (f) => (f.tags || []).join(" "),
+  },
+];
+
 // ----------------------------------------------------------------------------
 // 路由
 // ----------------------------------------------------------------------------
 
 function currentRoute() {
   const hash = location.hash.replace(/^#\/?/, "");
-  const [path, param] = hash.split("/");
-  return { path: path || "home", param };
+  const segments = hash.split("/").filter(Boolean);
+  return { path: segments[0] || "home", segments };
 }
 
 function navigate(path) {
@@ -302,24 +318,343 @@ function renderHome() {
 }
 
 // ----------------------------------------------------------------------------
-// 畫面：尚未建立的頁面（佔位）
+// 畫面：建立／編輯演出專案（活動資訊 + 專案名稱設定）
 // ----------------------------------------------------------------------------
 
-function renderPlaceholder(title) {
+function renderProjectForm(existing) {
+  const isEdit = !!existing;
+
+  // 表單狀態（single source of truth，由輸入事件同步更新）
+  const form = {
+    date: existing?.date || "",
+    band: existing?.band || "",
+    eventName: existing?.eventName || "",
+    location: existing?.location || "",
+    tags: [...(existing?.tags || [])],
+    note: existing?.note || "",
+    nameMode: existing?.nameMode || "auto",
+    autoFields: existing?.autoFields || ["date", "eventName"],
+    customName:
+      existing?.nameMode === "custom" ? existing?.name || "" : existing?.customName || "",
+  };
+
+  function computeName() {
+    if (form.nameMode === "custom") {
+      return form.customName.trim();
+    }
+    return NAME_VARS.filter((v) => form.autoFields.includes(v.key))
+      .map((v) => v.getValue(form))
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  function updatePreview() {
+    const preview = computeName() || "（尚未命名）";
+    const el = document.getElementById("name-preview");
+    if (el) el.textContent = "預覽：" + preview;
+  }
+
+  function renderNameSection() {
+    const chipRow = NAME_VARS.map((v) => {
+      if (form.nameMode === "auto") {
+        const active = form.autoFields.includes(v.key);
+        return `<button type="button" class="chip-btn${
+          active ? " active" : ""
+        }" data-varkey="${v.key}">${v.label}</button>`;
+      }
+      return `<button type="button" class="chip-btn" data-varkey="${v.key}">${v.label}</button>`;
+    }).join("");
+
+    const container = document.getElementById("name-section-body");
+    container.innerHTML = h`
+      <p style="font-size:11px; color:var(--text-muted); margin:0 0 6px;">
+        ${
+          form.nameMode === "auto"
+            ? "點選要組合進名稱的變數"
+            : "點選標籤可插入到下方文字框游標位置"
+        }
+      </p>
+      <div class="chip-row">${chipRow}</div>
+      ${
+        form.nameMode === "custom"
+          ? `<input type="text" id="f-customName" placeholder="輸入自訂專案名稱" value="${escapeAttr(
+              form.customName
+            )}" style="margin-bottom:10px;" />`
+          : ""
+      }
+      <div class="preview-box" id="name-preview">預覽：${escapeHTML(
+        computeName() || "（尚未命名）"
+      )}</div>
+    `;
+
+    container.querySelectorAll(".chip-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const key = btn.dataset.varkey;
+        if (form.nameMode === "auto") {
+          if (form.autoFields.includes(key)) {
+            form.autoFields = form.autoFields.filter((k) => k !== key);
+          } else {
+            form.autoFields.push(key);
+          }
+          renderNameSection();
+        } else {
+          const varDef = NAME_VARS.find((v) => v.key === key);
+          const value = varDef.getValue(form);
+          if (!value) return;
+          const input = document.getElementById("f-customName");
+          const start = input.selectionStart ?? input.value.length;
+          const end = input.selectionEnd ?? input.value.length;
+          const newVal =
+            input.value.slice(0, start) + value + input.value.slice(end);
+          form.customName = newVal;
+          input.value = newVal;
+          const caret = start + value.length;
+          input.focus();
+          input.setSelectionRange(caret, caret);
+          updatePreview();
+        }
+      });
+    });
+
+    if (form.nameMode === "custom") {
+      const input = document.getElementById("f-customName");
+      input.addEventListener("input", () => {
+        form.customName = input.value;
+        updatePreview();
+      });
+    }
+  }
+
+  function renderTagsUI() {
+    const container = document.getElementById("tags-body");
+    const tagChips = form.tags
+      .map(
+        (t, i) => h`
+        <span class="tag-chip">${escapeHTML(t)}<button type="button" data-idx="${i}" class="tag-remove-btn">${ICONS.close}</button></span>
+      `
+      )
+      .join("");
+    container.innerHTML = h`
+      <div class="chip-row" style="margin-bottom:8px;">${tagChips}</div>
+      <input type="text" id="f-tagInput" placeholder="輸入標籤後按 Enter 新增" />
+    `;
+    container.querySelectorAll(".tag-remove-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        form.tags.splice(Number(btn.dataset.idx), 1);
+        renderTagsUI();
+        updatePreview();
+      });
+    });
+    const tagInput = document.getElementById("f-tagInput");
+    tagInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const val = tagInput.value.trim();
+        if (val && !form.tags.includes(val)) {
+          form.tags.push(val);
+          renderTagsUI();
+          updatePreview();
+        } else {
+          tagInput.value = "";
+        }
+      }
+    });
+  }
+
   appEl.innerHTML = h`
     <div class="page">
       <div class="topbar">
         <button class="btn-icon" id="back-btn">${ICONS.arrowLeft}</button>
-        <span class="topbar-title">${title}</span>
+        <span class="topbar-title">${isEdit ? "編輯演出資訊" : "新增演出"}</span>
       </div>
+
+      <div class="form-group">
+        <label class="form-label">日期</label>
+        <input type="date" id="f-date" value="${escapeAttr(form.date)}" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">樂團</label>
+        <input type="text" id="f-band" placeholder="樂團名稱" value="${escapeAttr(
+          form.band
+        )}" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">活動名稱</label>
+        <input type="text" id="f-eventName" placeholder="例：河岸留言專場" value="${escapeAttr(
+          form.eventName
+        )}" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">地點</label>
+        <input type="text" id="f-location" placeholder="例：台北河岸留言" value="${escapeAttr(
+          form.location
+        )}" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">標籤</label>
+        <div id="tags-body"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">備註</label>
+        <textarea id="f-note" placeholder="舞台配置、演出注意事項...">${escapeHTML(
+          form.note
+        )}</textarea>
+      </div>
+
+      <div class="form-group" style="border-top:1px solid var(--border); padding-top:14px;">
+        <label class="form-label">專案名稱</label>
+        <div class="radio-row">
+          <label><input type="radio" name="nameMode" id="mode-auto" ${
+            form.nameMode === "auto" ? "checked" : ""
+          } /> 自動組合</label>
+          <label><input type="radio" name="nameMode" id="mode-custom" ${
+            form.nameMode === "custom" ? "checked" : ""
+          } /> 自訂輸入</label>
+        </div>
+        <div id="name-section-body"></div>
+      </div>
+
+      <div class="form-footer-spacer"></div>
+      <button class="btn btn-primary" id="save-project-btn">
+        ${isEdit ? "儲存變更" : "儲存並繼續編輯歌單"}
+      </button>
+    </div>
+  `;
+
+  renderTagsUI();
+  renderNameSection();
+
+  document.getElementById("back-btn").addEventListener("click", () => {
+    navigate(isEdit ? "project/" + existing.id : "home");
+  });
+
+  ["date", "band", "eventName", "location"].forEach((key) => {
+    const input = document.getElementById("f-" + key);
+    input.addEventListener("input", () => {
+      form[key] = input.value;
+      updatePreview();
+    });
+  });
+
+  document.getElementById("f-note").addEventListener("input", (e) => {
+    form.note = e.target.value;
+  });
+
+  document.getElementById("mode-auto").addEventListener("change", () => {
+    form.nameMode = "auto";
+    renderNameSection();
+  });
+  document.getElementById("mode-custom").addEventListener("change", () => {
+    form.nameMode = "custom";
+    renderNameSection();
+  });
+
+  document
+    .getElementById("save-project-btn")
+    .addEventListener("click", async () => {
+      const btn = document.getElementById("save-project-btn");
+      btn.disabled = true;
+      btn.textContent = "儲存中...";
+
+      const name = computeName() || "未命名演出";
+      const payload = {
+        date: form.date,
+        band: form.band,
+        eventName: form.eventName,
+        location: form.location,
+        tags: form.tags,
+        note: form.note,
+        nameMode: form.nameMode,
+        autoFields: form.autoFields,
+        customName: form.customName,
+        name,
+        updatedAt: serverTimestamp(),
+      };
+
+      try {
+        if (isEdit) {
+          await updateDoc(
+            doc(db, "users", state.user.uid, "projects", existing.id),
+            payload
+          );
+          showToast("已儲存變更");
+          navigate("project/" + existing.id);
+        } else {
+          payload.songs = [];
+          payload.createdAt = serverTimestamp();
+          const colRef = collection(db, "users", state.user.uid, "projects");
+          const newDoc = await addDoc(colRef, payload);
+          showToast("已建立演出");
+          navigate("project/" + newDoc.id);
+        }
+      } catch (err) {
+        console.error(err);
+        showToast("儲存失敗，請確認網路連線或稍後再試", true);
+        btn.disabled = false;
+        btn.textContent = isEdit ? "儲存變更" : "儲存並繼續編輯歌單";
+      }
+    });
+}
+
+function escapeAttr(str) {
+  return escapeHTML(str).replace(/"/g, "&quot;");
+}
+
+// ----------------------------------------------------------------------------
+// 畫面：演出詳情（歌單編輯，此階段為過渡畫面，下一步驟會補上完整歌單編輯功能）
+// ----------------------------------------------------------------------------
+
+function renderProjectDetail(project) {
+  if (!project) {
+    appEl.innerHTML = h`
+      <div class="page">
+        <div class="topbar">
+          <button class="btn-icon" id="back-btn">${ICONS.arrowLeft}</button>
+          <span class="topbar-title">找不到此演出</span>
+        </div>
+      </div>
+    `;
+    document.getElementById("back-btn").addEventListener("click", () => navigate("home"));
+    return;
+  }
+
+  appEl.innerHTML = h`
+    <div class="page">
+      <div class="topbar">
+        <button class="btn-icon" id="back-btn">${ICONS.arrowLeft}</button>
+        <span class="topbar-title">${escapeHTML(project.name || "未命名演出")}</span>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <p style="margin:0 0 4px; font-size:13px; color:var(--text-secondary);">
+          ${fmtDate(project.date) || "未設定日期"}${
+    project.location ? " ・ " + escapeHTML(project.location) : ""
+  }
+        </p>
+        <p style="margin:0; font-size:13px; color:var(--text-secondary);">
+          ${(project.songs || []).length} 首歌曲
+        </p>
+      </div>
+
+      <button class="btn btn-secondary" id="edit-info-btn" style="margin-bottom:16px;">
+        編輯活動資訊
+      </button>
+
       <div class="empty-state">
-        <p>此畫面將於下一步驟建立</p>
+        <p>歌單編輯功能將於下一步驟建立</p>
       </div>
     </div>
   `;
-  document.getElementById("back-btn").addEventListener("click", () => {
-    navigate("home");
-  });
+
+  document.getElementById("back-btn").addEventListener("click", () => navigate("home"));
+  document
+    .getElementById("edit-info-btn")
+    .addEventListener("click", () => navigate("project/" + project.id + "/edit"));
 }
 
 function renderSettingsPlaceholder() {
@@ -368,15 +703,23 @@ function render() {
     return;
   }
 
-  const { path } = currentRoute();
+  const { path, segments } = currentRoute();
 
   switch (path) {
     case "new":
-      renderPlaceholder("新增演出");
+      renderProjectForm(null);
       break;
-    case "project":
-      renderPlaceholder("編輯歌單");
+    case "project": {
+      const id = segments[1];
+      const isEditSub = segments[2] === "edit";
+      const project = state.projects.find((p) => p.id === id) || null;
+      if (isEditSub) {
+        renderProjectForm(project);
+      } else {
+        renderProjectDetail(project);
+      }
       break;
+    }
     case "settings":
       renderSettingsPlaceholder();
       break;

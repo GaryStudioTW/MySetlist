@@ -417,6 +417,103 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 }
 
 /* ==========================================================================
+   建立 / 編輯專案表單
+   ========================================================================== */
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 6px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 64px;
+  resize: vertical;
+}
+
+.radio-row {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 10px;
+}
+
+.radio-row label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.radio-row input[type="radio"] {
+  width: auto;
+  accent-color: var(--accent);
+}
+
+.chip-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.chip-btn {
+  background: var(--surface-3);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-strong);
+  font-size: 11px;
+  padding: 4px 11px;
+  border-radius: var(--radius-pill);
+}
+
+.chip-btn.active {
+  background: var(--accent-bg);
+  color: var(--accent-text);
+  border-color: var(--accent-border);
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  font-size: 12px;
+  padding: 3px 6px 3px 10px;
+  border-radius: var(--radius-pill);
+  color: var(--text-primary);
+}
+
+.tag-remove-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  font-size: 12px;
+}
+
+.preview-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.form-footer-spacer {
+  height: 4px;
+}
+
+/* ==========================================================================
    使用者列 (topbar 帳號顯示)
    ========================================================================== */
 
