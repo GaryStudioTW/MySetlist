@@ -220,24 +220,43 @@ export async function searchSpotifyTracks(query, limit = 10) {
   });
 }
 
-// 純用歌名搜尋很容易配對到同名但不同樂團（甚至同樂團不同專輯，例如精選輯重新收錄版）
-// 的歌曲，因此依序嘗試：歌曲+歌手+專輯（最精確）→歌曲+歌手 → 歌手+歌曲（寬鬆比對）
-// → 純歌名（最後退路），一找到結果就採用
+// 去除標點符號、空白後轉小寫再比對是否互相包含，避免專輯名稱因為標點、副標題
+// 等細微差異（例如「Let's Go!」vs「Let's Go」）就完全比對不到
+function normalizeForCompare(str) {
+  return (str || "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]/gu, "");
+}
+
+function albumHintMatches(candidateAlbum, hint) {
+  const a = normalizeForCompare(candidateAlbum);
+  const b = normalizeForCompare(hint);
+  if (!a || !b) return false;
+  return a.includes(b) || b.includes(a);
+}
+
+// 從候選清單中挑出專輯名稱跟提示最相符的一筆，找不到就用排名最前面的當退路
+function pickBestByAlbum(candidates, album) {
+  if (!candidates.length) return null;
+  if (album && album.trim()) {
+    const matched = candidates.find((c) => albumHintMatches(c.album, album));
+    if (matched) return matched;
+  }
+  return candidates[0];
+}
+
+// 純用歌名搜尋很容易配對到同名但不同樂團的歌曲；就算加上歌手名，Spotify 的排序
+// 也常常把精選輯、重新收錄版排在原始專輯前面。因此改成：用歌手+歌曲抓多筆候選，
+// 自己依專輯名稱（寬鬆比對）從候選中挑出最符合的一筆，抓不到候選時才逐步放寬
 export async function findBestTrackMatch(songName, artist, album) {
   if (artist && artist.trim()) {
-    if (album && album.trim()) {
-      const withAlbum = await searchSpotifyTracks(
-        `track:"${songName}" artist:"${artist}" album:"${album}"`,
-        1
-      );
-      if (withAlbum[0]) return withAlbum[0];
-    }
+    const filtered = await searchSpotifyTracks(`track:"${songName}" artist:"${artist}"`, 10);
+    const filteredPick = pickBestByAlbum(filtered, album);
+    if (filteredPick) return filteredPick;
 
-    const filtered = await searchSpotifyTracks(`track:"${songName}" artist:"${artist}"`, 1);
-    if (filtered[0]) return filtered[0];
-
-    const loose = await searchSpotifyTracks(`${artist} ${songName}`, 1);
-    if (loose[0]) return loose[0];
+    const loose = await searchSpotifyTracks(`${artist} ${songName}`, 10);
+    const loosePick = pickBestByAlbum(loose, album);
+    if (loosePick) return loosePick;
   }
   const results = await searchSpotifyTracks(songName, 1);
   return results[0] || null;
