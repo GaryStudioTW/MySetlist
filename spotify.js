@@ -200,7 +200,8 @@ export async function getSpotifyProfile() {
   return res.json();
 }
 
-export async function searchSpotifyTracks(query, limit = 20) {
+// Spotify 目前 /search 的 limit 上限是 10（官方文件已從舊版的 50 調降）
+export async function searchSpotifyTracks(query, limit = 10) {
   if (!query.trim()) return [];
   const q = encodeURIComponent(query);
   const res = await spotifyFetch(`/search?q=${q}&type=track&limit=${limit}`);
@@ -238,14 +239,15 @@ export async function getUserPlaylists() {
 export async function addTracksToPlaylist(playlistId, uris) {
   for (let i = 0; i < uris.length; i += 100) {
     const batch = uris.slice(i, i + 100);
-    const res = await spotifyFetch(`/playlists/${playlistId}/tracks`, {
+    // Spotify 已將此端點從 /tracks 遷移至 /items（舊路徑會回傳 403）
+    const res = await spotifyFetch(`/playlists/${playlistId}/items`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ uris: batch }),
     });
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({}));
-      throw new Error(errBody?.error?.message || "加入播放清單失敗");
+      throw new Error(errBody?.error?.message || `加入播放清單失敗（${res.status}）`);
     }
   }
 }

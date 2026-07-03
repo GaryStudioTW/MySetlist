@@ -999,7 +999,7 @@ async function initSongBrowser() {
     const seq = ++spotifySearchSeq;
     browseArea.innerHTML = `<div class="center-loading" style="min-height:60px;"><div class="spinner"></div></div>`;
     try {
-      const results = await searchSpotifyTracks(q, 20);
+      const results = await searchSpotifyTracks(q, 10);
       if (seq !== spotifySearchSeq || activeTab !== "spotify" || !editorState) return;
       renderSpotifyResults(results);
     } catch (err) {
