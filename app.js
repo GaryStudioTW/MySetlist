@@ -24,6 +24,17 @@ import {
   orderBy,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import {
+  connectSpotify,
+  disconnectSpotify,
+  isSpotifyConnected,
+  handleRedirectCallback,
+  getSpotifyProfile,
+  searchSpotifyTracks,
+  findBestTrackMatch,
+  getUserPlaylists,
+  addTracksToPlaylist,
+} from "./spotify.js";
 
 // ----------------------------------------------------------------------------
 // Firebase 設定與初始化
@@ -116,7 +127,17 @@ const ICONS = {
   logout: `<svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>`,
   close: `<svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>`,
   grip: `<svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="9" cy="18" r="1.2"/><circle cx="15" cy="6" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="15" cy="18" r="1.2"/></svg>`,
+  spotifyDot: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="color:var(--spotify); width:0.6em; height:0.6em; vertical-align:0;"><circle cx="12" cy="12" r="12"/></svg>`,
 };
+
+function spotifyLogoSVG() {
+  return `<svg width="18" height="18" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="12" fill="#1DB954"/>
+    <path d="M6.5 9.5c4-1.2 8.3-1 11.3.8" stroke="#06210F" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+    <path d="M7 13c3.2-.9 6.6-.7 9.2.7" stroke="#06210F" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+    <path d="M7.5 16.2c2.6-.6 5.2-.5 7.3.6" stroke="#06210F" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+  </svg>`;
+}
 
 function googleLogoSVG() {
   return `<svg width="18" height="18" viewBox="0 0 48 48">
@@ -692,6 +713,11 @@ function renderProjectDetail(project) {
         編輯活動資訊
       </button>
 
+      <div class="tab-row" id="song-source-tabs">
+        <button type="button" class="tab-btn active" data-tab="offline">離線歌曲庫</button>
+        <button type="button" class="tab-btn" data-tab="spotify">Spotify 搜尋</button>
+      </div>
+
       <div class="search-box">
         ${ICONS.search}
         <input type="text" id="song-search-input" placeholder="搜尋代碼、歌名、歌詞" />
@@ -710,6 +736,10 @@ function renderProjectDetail(project) {
       </div>
 
       <div class="song-list" id="selected-songs-list"></div>
+
+      <button class="btn btn-spotify" id="add-to-spotify-btn" style="margin-top:14px;">
+        ${spotifyLogoSVG()} 一鍵加入 Spotify 播放清單
+      </button>
     </div>
   `;
 
@@ -721,6 +751,9 @@ function renderProjectDetail(project) {
     editorState = null;
     navigate("project/" + project.id + "/edit");
   });
+  document
+    .getElementById("add-to-spotify-btn")
+    .addEventListener("click", openAddToSpotifyModal);
 
   renderSongsList();
   initSongBrowser();
@@ -733,7 +766,50 @@ function renderProjectDetail(project) {
 async function initSongBrowser() {
   const browseArea = document.getElementById("song-browse-area");
   const searchInput = document.getElementById("song-search-input");
-  if (!browseArea || !searchInput) return;
+  const tabsEl = document.getElementById("song-source-tabs");
+  if (!browseArea || !searchInput || !tabsEl) return;
+
+  const PLACEHOLDERS = {
+    offline: "搜尋代碼、歌名、歌詞",
+    spotify: "搜尋 Spotify 歌曲、歌手",
+  };
+
+  let activeTab = "offline";
+  let lastResults = [];
+  let spotifyDebounceTimer = null;
+  let spotifySearchSeq = 0;
+
+  // ---------------- 分頁切換 ----------------
+
+  function setTab(tab) {
+    if (activeTab === tab) return;
+    activeTab = tab;
+    tabsEl.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.tab === tab);
+    });
+    searchInput.placeholder = PLACEHOLDERS[tab];
+    searchInput.value = "";
+    if (tab === "offline") {
+      doOfflineSearch("");
+    } else {
+      renderSpotifyTabInitial();
+    }
+  }
+
+  tabsEl.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => setTab(btn.dataset.tab));
+  });
+
+  searchInput.addEventListener("input", () => {
+    if (activeTab === "offline") {
+      doOfflineSearch(searchInput.value);
+    } else {
+      clearTimeout(spotifyDebounceTimer);
+      spotifyDebounceTimer = setTimeout(() => doSpotifySearch(searchInput.value), 400);
+    }
+  });
+
+  // ---------------- 離線歌曲庫 ----------------
 
   browseArea.innerHTML = `<div class="center-loading" style="min-height:60px;"><div class="spinner"></div></div>`;
 
@@ -741,15 +817,12 @@ async function initSongBrowser() {
   try {
     songsDB = await loadSongsDB();
   } catch (err) {
-    browseArea.innerHTML = `<p style="font-size:12px; color:var(--text-secondary);">離線歌曲資料庫載入失敗，請確認網路連線後重新整理頁面</p>`;
-    return;
+    songsDB = null;
   }
 
   if (!editorState) return; // 使用者可能已離開此頁
 
-  let lastResults = [];
-
-  function renderResults(list) {
+  function renderOfflineResults(list) {
     lastResults = list;
     browseArea.innerHTML = list
       .map(
@@ -766,7 +839,7 @@ async function initSongBrowser() {
       `
       )
       .join("");
-    bindAddButtons();
+    bindOfflineAddButtons();
   }
 
   function renderBrowseBySection() {
@@ -824,7 +897,7 @@ async function initSongBrowser() {
     });
   }
 
-  function bindAddButtons() {
+  function bindOfflineAddButtons() {
     browseArea.querySelectorAll(".song-add-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const idx = Number(btn.dataset.idx);
@@ -834,7 +907,11 @@ async function initSongBrowser() {
     });
   }
 
-  function doSearch(kw) {
+  function doOfflineSearch(kw) {
+    if (!songsDB) {
+      browseArea.innerHTML = `<p style="font-size:12px; color:var(--text-secondary);">離線歌曲資料庫載入失敗，請確認網路連線後重新整理頁面</p>`;
+      return;
+    }
     const q = kw.trim().toLowerCase();
     if (!q) {
       renderBrowseBySection();
@@ -850,14 +927,89 @@ async function initSongBrowser() {
       })
       .slice(0, 40);
     if (results.length) {
-      renderResults(results);
+      renderOfflineResults(results);
     } else {
       browseArea.innerHTML = `<p style="font-size:12px; color:var(--text-secondary); padding:8px 0;">找不到符合的歌曲</p>`;
     }
   }
 
-  doSearch("");
-  searchInput.addEventListener("input", () => doSearch(searchInput.value));
+  // ---------------- Spotify 搜尋 ----------------
+
+  function renderSpotifyConnectPrompt() {
+    browseArea.innerHTML = h`
+      <div class="empty-state" style="padding:24px 0;">
+        <p style="font-size:13px;">尚未連接 Spotify 帳號</p>
+        <button type="button" class="btn btn-spotify" id="spotify-tab-connect-btn" style="width:auto; padding:10px 20px;">
+          ${spotifyLogoSVG()} 連接 Spotify
+        </button>
+      </div>
+    `;
+    const btn = document.getElementById("spotify-tab-connect-btn");
+    if (btn) btn.addEventListener("click", () => connectSpotify());
+  }
+
+  function renderSpotifyTabInitial() {
+    if (!isSpotifyConnected()) {
+      renderSpotifyConnectPrompt();
+      return;
+    }
+    browseArea.innerHTML = `<p style="font-size:12px; color:var(--text-secondary); padding:8px 0;">輸入歌名或歌手開始搜尋</p>`;
+  }
+
+  function renderSpotifyResults(list) {
+    lastResults = list;
+    if (!list.length) {
+      browseArea.innerHTML = `<p style="font-size:12px; color:var(--text-secondary); padding:8px 0;">找不到符合的歌曲</p>`;
+      return;
+    }
+    browseArea.innerHTML = list
+      .map(
+        (t, i) => h`
+        <div class="song-result-row" data-idx="${i}">
+          <div class="song-result-info">
+            <p class="song-result-name">${escapeHTML(t.name)}</p>
+            <p class="song-result-meta">${escapeHTML(t.artists)}${
+          t.album ? " ・ " + escapeHTML(t.album) : ""
+        }</p>
+          </div>
+          <button type="button" class="song-add-btn" data-idx="${i}">${ICONS.plus}</button>
+        </div>
+      `
+      )
+      .join("");
+    browseArea.querySelectorAll(".song-add-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const idx = Number(btn.dataset.idx);
+        const track = lastResults[idx];
+        if (track) addSpotifyTrackToSetlist(track);
+      });
+    });
+  }
+
+  async function doSpotifySearch(kw) {
+    if (!isSpotifyConnected()) {
+      renderSpotifyConnectPrompt();
+      return;
+    }
+    const q = kw.trim();
+    if (!q) {
+      renderSpotifyTabInitial();
+      return;
+    }
+    const seq = ++spotifySearchSeq;
+    browseArea.innerHTML = `<div class="center-loading" style="min-height:60px;"><div class="spinner"></div></div>`;
+    try {
+      const results = await searchSpotifyTracks(q, 20);
+      if (seq !== spotifySearchSeq || activeTab !== "spotify" || !editorState) return;
+      renderSpotifyResults(results);
+    } catch (err) {
+      if (seq !== spotifySearchSeq || activeTab !== "spotify" || !editorState) return;
+      console.error(err);
+      browseArea.innerHTML = `<p style="font-size:12px; color:var(--danger); padding:8px 0;">Spotify 搜尋失敗，請確認連線或重新連接帳號</p>`;
+    }
+  }
+
+  doOfflineSearch("");
 }
 
 function addSongToSetlist(songDbEntry) {
@@ -869,6 +1021,147 @@ function addSongToSetlist(songDbEntry) {
   });
   renderSongsList();
   persistSongs();
+}
+
+function addSpotifyTrackToSetlist(track) {
+  if (!editorState) return;
+  editorState.songs.push({
+    key: editorState.nextKey(),
+    name: track.name,
+    source: "spotify",
+    artists: track.artists,
+    spotifyUri: track.uri,
+    spotifyId: track.id,
+  });
+  renderSongsList();
+  persistSongs();
+}
+
+// ----------------------------------------------------------------------------
+// 一鍵加入 Spotify 播放清單：選擇播放清單 → 自動比對歌曲 → 加入
+// ----------------------------------------------------------------------------
+
+async function openAddToSpotifyModal() {
+  if (!editorState) return;
+
+  if (!isSpotifyConnected()) {
+    showToast("請先在設定頁連接 Spotify", true);
+    navigate("settings");
+    return;
+  }
+  if (!editorState.songs.length) {
+    showToast("目前歌單還沒有歌曲");
+    return;
+  }
+
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  overlay.innerHTML = h`
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <span class="modal-title">選擇要加入的播放清單</span>
+        <button type="button" class="btn-icon" id="modal-close-btn">${ICONS.close}</button>
+      </div>
+      <div id="modal-body">
+        <div class="center-loading" style="min-height:80px;"><div class="spinner"></div></div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) close();
+  });
+  overlay.querySelector("#modal-close-btn").addEventListener("click", close);
+
+  const bodyEl = overlay.querySelector("#modal-body");
+
+  try {
+    const playlists = await getUserPlaylists();
+    if (!editorState) {
+      close();
+      return;
+    }
+    if (!playlists.length) {
+      bodyEl.innerHTML = `<p style="font-size:13px; color:var(--text-secondary);">找不到可用的播放清單，請先在 Spotify 建立一個播放清單</p>`;
+      return;
+    }
+    bodyEl.innerHTML = playlists
+      .map(
+        (p) => h`
+        <button type="button" class="playlist-row" data-id="${p.id}">
+          <span class="playlist-name">${escapeHTML(p.name)}</span>
+          <span class="playlist-count">${p.trackCount}首</span>
+        </button>
+      `
+      )
+      .join("");
+    bodyEl.querySelectorAll(".playlist-row").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        runAddToSpotifyPlaylist(btn.dataset.id, bodyEl, close);
+      });
+    });
+  } catch (err) {
+    console.error(err);
+    bodyEl.innerHTML = `<p style="font-size:13px; color:var(--danger);">無法取得播放清單，請確認 Spotify 連接狀態</p>`;
+  }
+}
+
+async function runAddToSpotifyPlaylist(playlistId, bodyEl, close) {
+  if (!editorState) {
+    close();
+    return;
+  }
+  const songs = editorState.songs;
+
+  bodyEl.innerHTML = h`
+    <div class="center-loading" style="min-height:80px; flex-direction:column; gap:10px;">
+      <div class="spinner"></div>
+      <p style="font-size:12px; color:var(--text-secondary);" id="match-progress">比對歌曲中...0/${songs.length}</p>
+    </div>
+  `;
+  const progressEl = bodyEl.querySelector("#match-progress");
+
+  const uris = [];
+  let unmatched = 0;
+
+  for (let i = 0; i < songs.length; i++) {
+    const s = songs[i];
+    try {
+      if (s.spotifyUri) {
+        uris.push(s.spotifyUri);
+      } else {
+        const match = await findBestTrackMatch(s.name);
+        if (match) uris.push(match.uri);
+        else unmatched++;
+      }
+    } catch (err) {
+      console.error(err);
+      unmatched++;
+    }
+    if (progressEl) progressEl.textContent = `比對歌曲中...${i + 1}/${songs.length}`;
+  }
+
+  if (!uris.length) {
+    bodyEl.innerHTML = `<p style="font-size:13px; color:var(--text-secondary);">找不到任何相符的 Spotify 歌曲</p>`;
+    return;
+  }
+
+  try {
+    await addTracksToPlaylist(playlistId, uris);
+    close();
+    showToast(
+      unmatched
+        ? `已加入 ${uris.length} 首，${unmatched} 首找不到相符歌曲`
+        : `已加入 ${uris.length} 首到播放清單`
+    );
+  } catch (err) {
+    console.error(err);
+    bodyEl.innerHTML = `<p style="font-size:13px; color:var(--danger);">加入播放清單失敗：${escapeHTML(
+      err.message || ""
+    )}</p>`;
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -885,18 +1178,21 @@ function renderSongsList() {
     container.innerHTML = `<div class="empty-state" style="padding:24px 0;"><p style="font-size:13px;">還沒有加入任何歌曲</p></div>`;
   } else {
     container.innerHTML = editorState.songs
-      .map(
-        (s, i) => h`
+      .map((s, i) => {
+        const sub = s.source === "spotify" ? s.artists : s.section;
+        return h`
         <div class="song-row" data-rowkey="${s.key}">
           <span class="drag-handle">${ICONS.grip}</span>
           <span class="song-row-num">${i + 1}</span>
-          <span class="song-row-name">${escapeHTML(s.name)}${
-          s.section ? ` <span class="song-row-album">（${escapeHTML(s.section)}）</span>` : ""
+          <span class="song-row-name">${
+            s.source === "spotify" ? ICONS.spotifyDot + " " : ""
+          }${escapeHTML(s.name)}${
+          sub ? ` <span class="song-row-album">（${escapeHTML(sub)}）</span>` : ""
         }</span>
           <button type="button" class="song-remove-btn" data-rowkey="${s.key}">${ICONS.close}</button>
         </div>
-      `
-      )
+      `;
+      })
       .join("");
   }
 
@@ -1006,7 +1302,9 @@ async function persistSongs() {
   }
 }
 
-function renderSettingsPlaceholder() {
+function renderSettings() {
+  const connected = isSpotifyConnected();
+
   appEl.innerHTML = h`
     <div class="page">
       <div class="topbar">
@@ -1021,14 +1319,74 @@ function renderSettingsPlaceholder() {
           state.user?.email || ""
         )}</p>
       </div>
-      <p style="font-size:12px; color:var(--text-secondary); margin-bottom:16px;">
-        Spotify 連接與其他設定將於下一步驟建立
-      </p>
+
+      <div class="card" style="margin-bottom:16px;" id="spotify-card">
+        ${renderSpotifyCardBody(connected)}
+      </div>
+
       <button class="btn btn-ghost" id="signout-btn">${ICONS.logout} 登出</button>
     </div>
   `;
   document.getElementById("back-btn").addEventListener("click", () => navigate("home"));
   document.getElementById("signout-btn").addEventListener("click", handleSignOut);
+
+  bindSpotifyCardEvents();
+  if (connected) loadSpotifyProfileIntoCard();
+}
+
+function renderSpotifyCardBody(connected) {
+  if (!connected) {
+    return h`
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+        <span style="font-size:14px; font-weight:600;">Spotify</span>
+        <span class="badge badge-neutral">尚未連接</span>
+      </div>
+      <p style="margin:0 0 12px; font-size:12px; color:var(--text-secondary);">
+        連接後可將歌單一鍵加入 Spotify 播放清單
+      </p>
+      <button class="btn btn-spotify" id="spotify-connect-btn">${spotifyLogoSVG()} 連接 Spotify</button>
+    `;
+  }
+  return h`
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+      <span style="font-size:14px; font-weight:600;">Spotify</span>
+      <span class="badge badge-success">已連接</span>
+    </div>
+    <p style="margin:0 0 12px; font-size:12px; color:var(--text-secondary);" id="spotify-profile-line">
+      載入帳號資訊中...
+    </p>
+    <button class="btn btn-ghost" id="spotify-disconnect-btn">中斷連接</button>
+  `;
+}
+
+function bindSpotifyCardEvents() {
+  const connectBtn = document.getElementById("spotify-connect-btn");
+  if (connectBtn) {
+    connectBtn.addEventListener("click", () => {
+      connectBtn.disabled = true;
+      connectSpotify();
+    });
+  }
+  const disconnectBtn = document.getElementById("spotify-disconnect-btn");
+  if (disconnectBtn) {
+    disconnectBtn.addEventListener("click", () => {
+      disconnectSpotify();
+      showToast("已中斷 Spotify 連接");
+      renderSettings();
+    });
+  }
+}
+
+async function loadSpotifyProfileIntoCard() {
+  try {
+    const profile = await getSpotifyProfile();
+    const line = document.getElementById("spotify-profile-line");
+    if (line) line.textContent = "已連接帳號：" + (profile.display_name || profile.id);
+  } catch (err) {
+    console.error(err);
+    const line = document.getElementById("spotify-profile-line");
+    if (line) line.textContent = "無法取得帳號資訊，請確認連線或重新連接";
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -1078,7 +1436,7 @@ function render() {
     }
     case "settings":
       editorState = null;
-      renderSettingsPlaceholder();
+      renderSettings();
       break;
     case "home":
     default:
@@ -1088,7 +1446,17 @@ function render() {
   }
 }
 
-render();
+// 應用程式啟動：先處理 Spotify PKCE 登入導回（網址帶 ?code= 時），再進行首次渲染
+(async function init() {
+  const hasSpotifyCallback = new URLSearchParams(window.location.search).has("code");
+  if (hasSpotifyCallback) {
+    const ok = await handleRedirectCallback();
+    showToast(ok ? "Spotify 已連接" : "Spotify 連接失敗，請再試一次", !ok);
+    if (ok) navigate("settings");
+  }
+  render();
+})();
+
 loadSongsDB().catch(() => {
   /* 啟動時的預先載入失敗不影響其他畫面，實際使用時會在歌單編輯頁重試 */
 });
