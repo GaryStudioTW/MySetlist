@@ -62,6 +62,47 @@ const state = {
 
 const appEl = document.getElementById("app");
 
+// 歌單編輯器的暫存狀態（進入演出詳情頁時建立，離開時清除，避免Firestore即時同步
+// 造成畫面在編輯過程中被整頁重新渲染打斷操作）
+let editorState = null;
+
+// 離線歌曲資料庫（僅載入一次並快取於本機，離線時可從 localStorage 復原）
+let songsDBPromise = null;
+let SONGS_BY_SECTION = null;
+
+function loadSongsDB() {
+  if (songsDBPromise) return songsDBPromise;
+  songsDBPromise = (async () => {
+    try {
+      const res = await fetch("songs.json");
+      const data = await res.json();
+      try {
+        localStorage.setItem("songsDBCache", JSON.stringify(data));
+      } catch (e) {
+        /* localStorage 空間不足時忽略快取失敗 */
+      }
+      return data;
+    } catch (err) {
+      const cached = localStorage.getItem("songsDBCache");
+      if (cached) return JSON.parse(cached);
+      throw err;
+    }
+  })();
+  return songsDBPromise;
+}
+
+function getSongsBySection(songsDB) {
+  if (SONGS_BY_SECTION) return SONGS_BY_SECTION;
+  const map = new Map();
+  songsDB.forEach((s) => {
+    const key = s.section || "（無分類）";
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(s);
+  });
+  SONGS_BY_SECTION = map;
+  return map;
+}
+
 // ----------------------------------------------------------------------------
 // 小型 SVG 圖示（內嵌，不依賴外部圖示字型，離線也能正常顯示）
 // ----------------------------------------------------------------------------
@@ -74,6 +115,7 @@ const ICONS = {
   music: `<svg class="icon" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
   logout: `<svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>`,
   close: `<svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>`,
+  grip: `<svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="9" cy="18" r="1.2"/><circle cx="15" cy="6" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="15" cy="18" r="1.2"/></svg>`,
 };
 
 function googleLogoSVG() {
@@ -623,6 +665,14 @@ function renderProjectDetail(project) {
     return;
   }
 
+  // 建立編輯器暫存狀態（歌單陣列每筆加上本機用的 key，處理同曲重複加入時的排序穩定性）
+  let keyCounter = 0;
+  editorState = {
+    projectId: project.id,
+    songs: (project.songs || []).map((s) => ({ ...s, key: keyCounter++ })),
+    nextKey: () => keyCounter++,
+  };
+
   appEl.innerHTML = h`
     <div class="page">
       <div class="topbar">
@@ -630,14 +680,11 @@ function renderProjectDetail(project) {
         <span class="topbar-title">${escapeHTML(project.name || "未命名演出")}</span>
       </div>
 
-      <div class="card" style="margin-bottom:16px;">
+      <div class="card" style="margin-bottom:14px;">
         <p style="margin:0 0 4px; font-size:13px; color:var(--text-secondary);">
           ${fmtDate(project.date) || "未設定日期"}${
     project.location ? " ・ " + escapeHTML(project.location) : ""
   }
-        </p>
-        <p style="margin:0; font-size:13px; color:var(--text-secondary);">
-          ${(project.songs || []).length} 首歌曲
         </p>
       </div>
 
@@ -645,16 +692,318 @@ function renderProjectDetail(project) {
         編輯活動資訊
       </button>
 
-      <div class="empty-state">
-        <p>歌單編輯功能將於下一步驟建立</p>
+      <div class="search-box">
+        ${ICONS.search}
+        <input type="text" id="song-search-input" placeholder="搜尋代碼、歌名、歌詞" />
       </div>
+
+      <div id="song-browse-area" style="margin-bottom:20px;"></div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+        <span style="font-size:13px; font-weight:600;">已選歌單</span>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:12px; color:var(--text-secondary);" id="songs-count">${
+            editorState.songs.length
+          }首</span>
+          <span style="font-size:11px; color:var(--text-muted);" id="sync-badge"></span>
+        </div>
+      </div>
+
+      <div class="song-list" id="selected-songs-list"></div>
     </div>
   `;
 
-  document.getElementById("back-btn").addEventListener("click", () => navigate("home"));
-  document
-    .getElementById("edit-info-btn")
-    .addEventListener("click", () => navigate("project/" + project.id + "/edit"));
+  document.getElementById("back-btn").addEventListener("click", () => {
+    editorState = null;
+    navigate("home");
+  });
+  document.getElementById("edit-info-btn").addEventListener("click", () => {
+    editorState = null;
+    navigate("project/" + project.id + "/edit");
+  });
+
+  renderSongsList();
+  initSongBrowser();
+}
+
+// ----------------------------------------------------------------------------
+// 歌單編輯器：離線歌曲資料庫搜尋／瀏覽
+// ----------------------------------------------------------------------------
+
+async function initSongBrowser() {
+  const browseArea = document.getElementById("song-browse-area");
+  const searchInput = document.getElementById("song-search-input");
+  if (!browseArea || !searchInput) return;
+
+  browseArea.innerHTML = `<div class="center-loading" style="min-height:60px;"><div class="spinner"></div></div>`;
+
+  let songsDB;
+  try {
+    songsDB = await loadSongsDB();
+  } catch (err) {
+    browseArea.innerHTML = `<p style="font-size:12px; color:var(--text-secondary);">離線歌曲資料庫載入失敗，請確認網路連線後重新整理頁面</p>`;
+    return;
+  }
+
+  if (!editorState) return; // 使用者可能已離開此頁
+
+  let lastResults = [];
+
+  function renderResults(list) {
+    lastResults = list;
+    browseArea.innerHTML = list
+      .map(
+        (s, i) => h`
+        <div class="song-result-row" data-idx="${i}">
+          <div class="song-result-info">
+            <p class="song-result-name">${escapeHTML(s.name)}</p>
+            <p class="song-result-meta">${escapeHTML(s.section || "")}${
+          s.lyric ? " ・ " + escapeHTML(s.lyric) : ""
+        }</p>
+          </div>
+          <button type="button" class="song-add-btn" data-idx="${i}">${ICONS.plus}</button>
+        </div>
+      `
+      )
+      .join("");
+    bindAddButtons();
+  }
+
+  function renderBrowseBySection() {
+    const bySection = getSongsBySection(songsDB);
+    browseArea.innerHTML = [...bySection.entries()]
+      .map(([section, songs]) => {
+        return h`
+        <details class="album-group">
+          <summary>${escapeHTML(section)}（${songs.length}首）</summary>
+          <div class="album-group-body" data-section="${escapeHTML(section)}"></div>
+        </details>
+      `;
+      })
+      .join("");
+
+    // 每個 <details> 展開時才渲染內容（避免一次渲染143首造成畫面卡頓）
+    browseArea.querySelectorAll(".album-group").forEach((detailsEl) => {
+      detailsEl.addEventListener(
+        "toggle",
+        () => {
+          if (!detailsEl.open) return;
+          const body = detailsEl.querySelector(".album-group-body");
+          if (body.dataset.rendered) return;
+          const section = body.dataset.section;
+          const songs = bySection.get(section) || [];
+          body.innerHTML = songs
+            .map(
+              (s, i) => h`
+              <div class="song-result-row" data-section="${escapeHTML(
+                section
+              )}" data-localidx="${i}">
+                <div class="song-result-info">
+                  <p class="song-result-name">${escapeHTML(s.name)}</p>
+                  <p class="song-result-meta">${escapeHTML(s.lyric || "")}</p>
+                </div>
+                <button type="button" class="song-add-btn-local" data-section="${escapeHTML(
+                  section
+                )}" data-localidx="${i}">${ICONS.plus}</button>
+              </div>
+            `
+            )
+            .join("");
+          body.dataset.rendered = "1";
+          body.querySelectorAll(".song-add-btn-local").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const sec = btn.dataset.section;
+              const idx = Number(btn.dataset.localidx);
+              const song = (bySection.get(sec) || [])[idx];
+              if (song) addSongToSetlist(song);
+            });
+          });
+        },
+        { once: false }
+      );
+    });
+  }
+
+  function bindAddButtons() {
+    browseArea.querySelectorAll(".song-add-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const idx = Number(btn.dataset.idx);
+        const song = lastResults[idx];
+        if (song) addSongToSetlist(song);
+      });
+    });
+  }
+
+  function doSearch(kw) {
+    const q = kw.trim().toLowerCase();
+    if (!q) {
+      renderBrowseBySection();
+      return;
+    }
+    const results = songsDB
+      .filter((s) => {
+        return (
+          s.name.toLowerCase().includes(q) ||
+          (s.lyric || "").toLowerCase().includes(q) ||
+          (s.codes || []).some((c) => c.toLowerCase().includes(q))
+        );
+      })
+      .slice(0, 40);
+    if (results.length) {
+      renderResults(results);
+    } else {
+      browseArea.innerHTML = `<p style="font-size:12px; color:var(--text-secondary); padding:8px 0;">找不到符合的歌曲</p>`;
+    }
+  }
+
+  doSearch("");
+  searchInput.addEventListener("input", () => doSearch(searchInput.value));
+}
+
+function addSongToSetlist(songDbEntry) {
+  if (!editorState) return;
+  editorState.songs.push({
+    key: editorState.nextKey(),
+    name: songDbEntry.name,
+    section: songDbEntry.section || "",
+  });
+  renderSongsList();
+  persistSongs();
+}
+
+// ----------------------------------------------------------------------------
+// 歌單編輯器：已選歌單清單（拖曳排序、刪除、即時存檔）
+// ----------------------------------------------------------------------------
+
+function renderSongsList() {
+  if (!editorState) return;
+  const container = document.getElementById("selected-songs-list");
+  const countEl = document.getElementById("songs-count");
+  if (!container) return;
+
+  if (!editorState.songs.length) {
+    container.innerHTML = `<div class="empty-state" style="padding:24px 0;"><p style="font-size:13px;">還沒有加入任何歌曲</p></div>`;
+  } else {
+    container.innerHTML = editorState.songs
+      .map(
+        (s, i) => h`
+        <div class="song-row" data-rowkey="${s.key}">
+          <span class="drag-handle">${ICONS.grip}</span>
+          <span class="song-row-num">${i + 1}</span>
+          <span class="song-row-name">${escapeHTML(s.name)}${
+          s.section ? ` <span class="song-row-album">（${escapeHTML(s.section)}）</span>` : ""
+        }</span>
+          <button type="button" class="song-remove-btn" data-rowkey="${s.key}">${ICONS.close}</button>
+        </div>
+      `
+      )
+      .join("");
+  }
+
+  if (countEl) countEl.textContent = editorState.songs.length + "首";
+
+  container.querySelectorAll(".song-remove-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const key = Number(btn.dataset.rowkey);
+      editorState.songs = editorState.songs.filter((s) => s.key !== key);
+      renderSongsList();
+      persistSongs();
+    });
+  });
+
+  container.querySelectorAll(".drag-handle").forEach((handle) => {
+    attachDragHandlers(handle);
+  });
+}
+
+let dragCtx = null;
+
+function attachDragHandlers(handle) {
+  handle.addEventListener("pointerdown", (e) => {
+    const row = handle.closest(".song-row");
+    if (!row) return;
+    dragCtx = { row };
+    row.classList.add("dragging");
+    handle.setPointerCapture(e.pointerId);
+  });
+
+  handle.addEventListener("pointermove", (e) => {
+    if (!dragCtx) return;
+    const container = document.getElementById("selected-songs-list");
+    if (!container) return;
+    const rows = [...container.querySelectorAll(".song-row")];
+    const y = e.clientY;
+    const draggedRect = dragCtx.row.getBoundingClientRect();
+    for (const other of rows) {
+      if (other === dragCtx.row) continue;
+      const rect = other.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      if (draggedRect.top < rect.top && y > mid) {
+        container.insertBefore(dragCtx.row, other.nextSibling);
+        break;
+      } else if (draggedRect.top > rect.top && y < mid) {
+        container.insertBefore(dragCtx.row, other);
+        break;
+      }
+    }
+  });
+
+  handle.addEventListener("pointerup", () => {
+    if (!dragCtx) return;
+    dragCtx.row.classList.remove("dragging");
+    finalizeSongOrder();
+    dragCtx = null;
+  });
+
+  handle.addEventListener("pointercancel", () => {
+    if (dragCtx) {
+      dragCtx.row.classList.remove("dragging");
+      dragCtx = null;
+    }
+  });
+}
+
+function finalizeSongOrder() {
+  if (!editorState) return;
+  const container = document.getElementById("selected-songs-list");
+  if (!container) return;
+  const rows = [...container.querySelectorAll(".song-row")];
+  const newOrder = rows
+    .map((row) => editorState.songs.find((s) => String(s.key) === row.dataset.rowkey))
+    .filter(Boolean);
+  editorState.songs = newOrder;
+  rows.forEach((row, i) => {
+    const numEl = row.querySelector(".song-row-num");
+    if (numEl) numEl.textContent = i + 1;
+  });
+  if (document.getElementById("songs-count")) {
+    document.getElementById("songs-count").textContent = editorState.songs.length + "首";
+  }
+  persistSongs();
+}
+
+async function persistSongs() {
+  if (!editorState) return;
+  const badge = document.getElementById("sync-badge");
+  if (badge) badge.textContent = "已存本機・同步中";
+
+  const projectId = editorState.projectId;
+  const songsToSave = editorState.songs.map(({ key, ...rest }) => rest);
+
+  try {
+    await updateDoc(doc(db, "users", state.user.uid, "projects", projectId), {
+      songs: songsToSave,
+      updatedAt: serverTimestamp(),
+    });
+    if (badge && editorState && editorState.projectId === projectId) {
+      badge.textContent = "已同步";
+    }
+  } catch (err) {
+    console.error(err);
+    if (badge && editorState && editorState.projectId === projectId) {
+      badge.textContent = "同步失敗";
+    }
+  }
 }
 
 function renderSettingsPlaceholder() {
@@ -707,6 +1056,7 @@ function render() {
 
   switch (path) {
     case "new":
+      editorState = null;
       renderProjectForm(null);
       break;
     case "project": {
@@ -714,20 +1064,31 @@ function render() {
       const isEditSub = segments[2] === "edit";
       const project = state.projects.find((p) => p.id === id) || null;
       if (isEditSub) {
+        editorState = null;
         renderProjectForm(project);
       } else {
+        // 若已經在編輯同一場演出的歌單，跳過整頁重繪（本機狀態已是最新，
+        // 避免每次 Firestore 同步都打斷正在進行的搜尋/拖曳操作）
+        if (editorState && editorState.projectId === id) {
+          break;
+        }
         renderProjectDetail(project);
       }
       break;
     }
     case "settings":
+      editorState = null;
       renderSettingsPlaceholder();
       break;
     case "home":
     default:
+      editorState = null;
       renderHome();
       break;
   }
 }
 
 render();
+loadSongsDB().catch(() => {
+  /* 啟動時的預先載入失敗不影響其他畫面，實際使用時會在歌單編輯頁重試 */
+});
