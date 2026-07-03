@@ -128,6 +128,8 @@ const ICONS = {
   close: `<svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>`,
   grip: `<svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="9" cy="18" r="1.2"/><circle cx="15" cy="6" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="15" cy="18" r="1.2"/></svg>`,
   spotifyDot: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="color:var(--spotify); width:0.6em; height:0.6em; vertical-align:0;"><circle cx="12" cy="12" r="12"/></svg>`,
+  edit: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`,
+  copy: `<svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
 };
 
 function spotifyLogoSVG() {
@@ -182,6 +184,22 @@ const NAME_VARS = [
     getValue: (f) => (f.tags || []).join(" "),
   },
 ];
+
+// 歌單中可插入的段落標記（僅供編排/複製社群文字使用，不參與 Spotify 比對匯入）
+const SEGMENT_MARKERS = [
+  { key: "soundcheck", label: "彩排" },
+  { key: "intro", label: "Intro" },
+  { key: "encore", label: "安可" },
+  { key: "outro", label: "Outro" },
+];
+
+function isMarker(item) {
+  return item.type === "marker";
+}
+
+function realSongCount(songs) {
+  return songs.filter((s) => !isMarker(s)).length;
+}
 
 // ----------------------------------------------------------------------------
 // 路由
@@ -701,17 +719,14 @@ function renderProjectDetail(project) {
         <span class="topbar-title">${escapeHTML(project.name || "未命名演出")}</span>
       </div>
 
-      <div class="card" style="margin-bottom:14px;">
-        <p style="margin:0 0 4px; font-size:13px; color:var(--text-secondary);">
+      <div class="card" style="margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <p style="margin:0; font-size:13px; color:var(--text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
           ${fmtDate(project.date) || "未設定日期"}${
     project.location ? " ・ " + escapeHTML(project.location) : ""
   }
         </p>
+        <button class="btn-icon" id="edit-info-btn" title="編輯活動資訊" style="flex-shrink:0;">${ICONS.edit}</button>
       </div>
-
-      <button class="btn btn-secondary" id="edit-info-btn" style="margin-bottom:16px;">
-        編輯活動資訊
-      </button>
 
       <div class="tab-row" id="song-source-tabs">
         <button type="button" class="tab-btn active" data-tab="offline">離線歌曲庫</button>
@@ -728,18 +743,32 @@ function renderProjectDetail(project) {
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
         <span style="font-size:13px; font-weight:600;">已選歌單</span>
         <div style="display:flex; align-items:center; gap:10px;">
-          <span style="font-size:12px; color:var(--text-secondary);" id="songs-count">${
-            editorState.songs.length
-          }首</span>
+          <span style="font-size:12px; color:var(--text-secondary);" id="songs-count">${realSongCount(
+            editorState.songs
+          )}首</span>
           <span style="font-size:11px; color:var(--text-muted);" id="sync-badge"></span>
         </div>
       </div>
 
+      <div class="chip-row" style="margin-bottom:10px;" id="segment-marker-row">
+        ${SEGMENT_MARKERS.map(
+          (m) =>
+            `<button type="button" class="chip-btn" data-marker-label="${escapeAttr(
+              m.label
+            )}">${ICONS.plus} ${escapeHTML(m.label)}</button>`
+        ).join("")}
+      </div>
+
       <div class="song-list" id="selected-songs-list"></div>
 
-      <button class="btn btn-spotify" id="add-to-spotify-btn" style="margin-top:14px;">
-        ${spotifyLogoSVG()} 一鍵加入 Spotify 播放清單
-      </button>
+      <div style="display:flex; gap:8px; margin-top:14px;">
+        <button class="btn btn-secondary" id="copy-social-btn" style="flex:1;">
+          ${ICONS.copy} 複製社群文字
+        </button>
+        <button class="btn btn-spotify" id="add-to-spotify-btn" style="flex:1;">
+          ${spotifyLogoSVG()} 一鍵加入 Spotify 播放清單
+        </button>
+      </div>
     </div>
   `;
 
@@ -754,6 +783,12 @@ function renderProjectDetail(project) {
   document
     .getElementById("add-to-spotify-btn")
     .addEventListener("click", openAddToSpotifyModal);
+  document
+    .getElementById("copy-social-btn")
+    .addEventListener("click", () => copySocialText(project));
+  document.querySelectorAll("#segment-marker-row .chip-btn").forEach((btn) => {
+    btn.addEventListener("click", () => addMarkerToSetlist(btn.dataset.markerLabel));
+  });
 
   renderSongsList();
   initSongBrowser();
@@ -1039,6 +1074,44 @@ function addSpotifyTrackToSetlist(track) {
   persistSongs();
 }
 
+function addMarkerToSetlist(label) {
+  if (!editorState) return;
+  editorState.songs.push({
+    key: editorState.nextKey(),
+    type: "marker",
+    label,
+  });
+  renderSongsList();
+  persistSongs();
+}
+
+// 段落標記在複製文字中的呈現格式暫定為「【標記】」，待確認正式的社群文字格式後再調整
+async function copySocialText(project) {
+  if (!editorState) return;
+
+  let songNum = 0;
+  const songLines = editorState.songs.map((s) => {
+    if (isMarker(s)) return `【${s.label}】`;
+    songNum++;
+    return `${songNum}. ${s.name}`;
+  });
+
+  const text = [
+    project.name || "",
+    songLines.join("\n"),
+    project.note || "",
+    (project.tags || []).join(" "),
+  ].join("\n\n");
+
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast("已複製社群文字到剪貼簿");
+  } catch (err) {
+    console.error(err);
+    showToast("複製失敗，請確認瀏覽器剪貼簿權限", true);
+  }
+}
+
 // ----------------------------------------------------------------------------
 // 一鍵加入 Spotify 播放清單：選擇播放清單 → 自動比對歌曲 → 加入
 // ----------------------------------------------------------------------------
@@ -1051,7 +1124,7 @@ async function openAddToSpotifyModal() {
     navigate("settings");
     return;
   }
-  if (!editorState.songs.length) {
+  if (!realSongCount(editorState.songs)) {
     showToast("目前歌單還沒有歌曲");
     return;
   }
@@ -1117,7 +1190,7 @@ async function runAddToSpotifyPlaylist(playlistId, bodyEl, close) {
     close();
     return;
   }
-  const songs = editorState.songs;
+  const songs = editorState.songs.filter((s) => !isMarker(s));
 
   bodyEl.innerHTML = h`
     <div class="center-loading" style="min-height:80px; flex-direction:column; gap:10px;">
@@ -1181,13 +1254,24 @@ function renderSongsList() {
   if (!editorState.songs.length) {
     container.innerHTML = `<div class="empty-state" style="padding:24px 0;"><p style="font-size:13px;">還沒有加入任何歌曲</p></div>`;
   } else {
+    let songNum = 0;
     container.innerHTML = editorState.songs
-      .map((s, i) => {
+      .map((s) => {
+        if (isMarker(s)) {
+          return h`
+        <div class="song-row song-row-marker" data-rowkey="${s.key}">
+          <span class="drag-handle">${ICONS.grip}</span>
+          <span class="song-row-marker-label">${escapeHTML(s.label)}</span>
+          <button type="button" class="song-remove-btn" data-rowkey="${s.key}">${ICONS.close}</button>
+        </div>
+      `;
+        }
+        songNum++;
         const sub = s.source === "spotify" ? s.artists : s.section;
         return h`
         <div class="song-row" data-rowkey="${s.key}">
           <span class="drag-handle">${ICONS.grip}</span>
-          <span class="song-row-num">${i + 1}</span>
+          <span class="song-row-num">${songNum}</span>
           <span class="song-row-name">${
             s.source === "spotify" ? ICONS.spotifyDot + " " : ""
           }${escapeHTML(s.name)}${
@@ -1200,7 +1284,7 @@ function renderSongsList() {
       .join("");
   }
 
-  if (countEl) countEl.textContent = editorState.songs.length + "首";
+  if (countEl) countEl.textContent = realSongCount(editorState.songs) + "首";
 
   container.querySelectorAll(".song-remove-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -1272,12 +1356,13 @@ function finalizeSongOrder() {
     .map((row) => editorState.songs.find((s) => String(s.key) === row.dataset.rowkey))
     .filter(Boolean);
   editorState.songs = newOrder;
-  rows.forEach((row, i) => {
+  let songNum = 0;
+  rows.forEach((row) => {
     const numEl = row.querySelector(".song-row-num");
-    if (numEl) numEl.textContent = i + 1;
+    if (numEl) numEl.textContent = ++songNum;
   });
   if (document.getElementById("songs-count")) {
-    document.getElementById("songs-count").textContent = editorState.songs.length + "首";
+    document.getElementById("songs-count").textContent = realSongCount(editorState.songs) + "首";
   }
   persistSongs();
 }

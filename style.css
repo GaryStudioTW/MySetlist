@@ -654,6 +654,20 @@ textarea {
   flex-shrink: 0;
 }
 
+.song-row-marker {
+  background: var(--surface-3);
+  border-style: dashed;
+}
+
+.song-row-marker-label {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+}
+
 /* ==========================================================================
    歌單編輯頁：歌曲來源分頁（離線歌曲庫 / Spotify 搜尋）
    ========================================================================== */
