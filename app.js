@@ -1064,6 +1064,12 @@ async function initSongBrowser() {
   doOfflineSearch("");
 }
 
+// 離線歌曲庫的 section 是「編號.專輯名」格式（例如「01.Let's Go!」），
+// 拿去跟 Spotify 比對前先去掉編號前綴，只留下比較接近真實專輯名稱的部分
+function cleanAlbumHint(section) {
+  return (section || "").replace(/^\d+\.\s*/, "").trim();
+}
+
 function addSongToSetlist(songDbEntry) {
   if (!editorState) return;
   const targetEditorState = editorState;
@@ -1075,16 +1081,20 @@ function addSongToSetlist(songDbEntry) {
   });
   renderSongsList();
   persistSongs();
-  matchOfflineSongWithSpotify(targetEditorState, key, songDbEntry.name);
+  matchOfflineSongWithSpotify(targetEditorState, key, songDbEntry.name, songDbEntry.section);
 }
 
 // 離線歌曲加入歌單後，若已連接 Spotify 就在背景嘗試比對同名歌曲，
 // 比對成功後補上封面縮圖與 spotifyUri，之後「加入播放清單」就不用再重新搜尋一次；
 // 純屬背景加值功能，失敗不影響操作也不跳錯誤提示
-async function matchOfflineSongWithSpotify(targetEditorState, key, songName) {
+async function matchOfflineSongWithSpotify(targetEditorState, key, songName, section) {
   if (!isSpotifyConnected()) return;
   try {
-    const match = await findBestTrackMatch(songName, targetEditorState.band);
+    const match = await findBestTrackMatch(
+      songName,
+      targetEditorState.band,
+      cleanAlbumHint(section)
+    );
     if (!match || editorState !== targetEditorState) return;
     const song = editorState.songs.find((s) => s.key === key);
     if (!song || isMarker(song)) return;
@@ -1105,6 +1115,7 @@ function addSpotifyTrackToSetlist(track) {
     name: track.name,
     source: "spotify",
     artists: track.artists,
+    album: track.album || "",
     spotifyUri: track.uri,
     spotifyId: track.id,
     albumImage: track.albumImage || "",
@@ -1253,7 +1264,11 @@ async function runAddToSpotifyPlaylist(playlistId, bodyEl, close) {
       if (s.spotifyUri) {
         uris.push(s.spotifyUri);
       } else {
-        const match = await findBestTrackMatch(s.name, editorState.band);
+        const match = await findBestTrackMatch(
+          s.name,
+          editorState.band,
+          cleanAlbumHint(s.section)
+        );
         if (match) uris.push(match.uri);
         else unmatched++;
       }
@@ -1311,7 +1326,7 @@ function renderSongsList() {
       `;
         }
         songNum++;
-        const sub = s.source === "spotify" ? s.artists : s.section;
+        const sub = s.source === "spotify" ? s.album : s.section;
         return h`
         <div class="song-row" data-rowkey="${s.key}">
           <span class="drag-handle">${ICONS.grip}</span>

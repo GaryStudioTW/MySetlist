@@ -220,10 +220,19 @@ export async function searchSpotifyTracks(query, limit = 10) {
   });
 }
 
-// 純用歌名搜尋很容易配對到同名但不同樂團的歌曲，若有樂團名稱可用就優先用
-// 精確欄位搜尋（track/artist）縮小範圍，找不到再退回寬鬆比對，最後才退回純歌名
-export async function findBestTrackMatch(songName, artist) {
+// 純用歌名搜尋很容易配對到同名但不同樂團（甚至同樂團不同專輯，例如精選輯重新收錄版）
+// 的歌曲，因此依序嘗試：歌曲+歌手+專輯（最精確）→歌曲+歌手 → 歌手+歌曲（寬鬆比對）
+// → 純歌名（最後退路），一找到結果就採用
+export async function findBestTrackMatch(songName, artist, album) {
   if (artist && artist.trim()) {
+    if (album && album.trim()) {
+      const withAlbum = await searchSpotifyTracks(
+        `track:"${songName}" artist:"${artist}" album:"${album}"`,
+        1
+      );
+      if (withAlbum[0]) return withAlbum[0];
+    }
+
     const filtered = await searchSpotifyTracks(`track:"${songName}" artist:"${artist}"`, 1);
     if (filtered[0]) return filtered[0];
 
