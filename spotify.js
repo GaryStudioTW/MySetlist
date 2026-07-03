@@ -207,13 +207,17 @@ export async function searchSpotifyTracks(query, limit = 10) {
   const res = await spotifyFetch(`/search?q=${q}&type=track&limit=${limit}`);
   if (!res.ok) throw new Error(await spotifyErrorMessage(res, "Spotify 搜尋失敗"));
   const data = await res.json();
-  return (data.tracks?.items || []).map((t) => ({
-    id: t.id,
-    uri: t.uri,
-    name: t.name,
-    artists: (t.artists || []).map((a) => a.name).join("、"),
-    album: t.album?.name || "",
-  }));
+  return (data.tracks?.items || []).map((t) => {
+    const images = t.album?.images || [];
+    return {
+      id: t.id,
+      uri: t.uri,
+      name: t.name,
+      artists: (t.artists || []).map((a) => a.name).join("、"),
+      album: t.album?.name || "",
+      albumImage: images[images.length - 1]?.url || images[0]?.url || "",
+    };
+  });
 }
 
 export async function findBestTrackMatch(songName) {

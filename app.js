@@ -132,8 +132,8 @@ const ICONS = {
   copy: `<svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
 };
 
-function spotifyLogoSVG() {
-  return `<svg width="18" height="18" viewBox="0 0 24 24">
+function spotifyLogoSVG(size = 24) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="flex-shrink:0;">
     <circle cx="12" cy="12" r="12" fill="#1DB954"/>
     <path d="M6.5 9.5c4-1.2 8.3-1 11.3.8" stroke="#06210F" stroke-width="1.6" stroke-linecap="round" fill="none"/>
     <path d="M7 13c3.2-.9 6.6-.7 9.2.7" stroke="#06210F" stroke-width="1.6" stroke-linecap="round" fill="none"/>
@@ -189,7 +189,7 @@ const NAME_VARS = [
 const SEGMENT_MARKERS = [
   { key: "soundcheck", label: "彩排" },
   { key: "intro", label: "Intro" },
-  { key: "encore", label: "安可" },
+  { key: "encore", label: "Encore" },
   { key: "outro", label: "Outro" },
 ];
 
@@ -686,6 +686,13 @@ function escapeAttr(str) {
   return escapeHTML(str).replace(/"/g, "&quot;");
 }
 
+// 專輯封面縮圖：有圖網址時顯示圖片，沒有時顯示留白佔位（維持列表對齊）
+function songThumbHTML(imageUrl) {
+  return imageUrl
+    ? `<img class="song-thumb" src="${escapeAttr(imageUrl)}" alt="" loading="lazy" />`
+    : `<div class="song-thumb song-thumb-empty">${ICONS.music}</div>`;
+}
+
 // ----------------------------------------------------------------------------
 // 畫面：演出詳情（歌單編輯，此階段為過渡畫面，下一步驟會補上完整歌單編輯功能）
 // ----------------------------------------------------------------------------
@@ -766,7 +773,7 @@ function renderProjectDetail(project) {
           ${ICONS.copy} 複製社群文字
         </button>
         <button class="btn btn-spotify" id="add-to-spotify-btn" style="flex:1;">
-          ${spotifyLogoSVG()} 一鍵加入 Spotify 播放清單
+          ${spotifyLogoSVG()} 加入Spotify播放清單
         </button>
       </div>
     </div>
@@ -1001,6 +1008,7 @@ async function initSongBrowser() {
       .map(
         (t, i) => h`
         <div class="song-result-row" data-idx="${i}">
+          ${songThumbHTML(t.albumImage)}
           <div class="song-result-info">
             <p class="song-result-name">${escapeHTML(t.name)}</p>
             <p class="song-result-meta">${escapeHTML(t.artists)}${
@@ -1051,13 +1059,36 @@ async function initSongBrowser() {
 
 function addSongToSetlist(songDbEntry) {
   if (!editorState) return;
+  const targetEditorState = editorState;
+  const key = editorState.nextKey();
   editorState.songs.push({
-    key: editorState.nextKey(),
+    key,
     name: songDbEntry.name,
     section: songDbEntry.section || "",
   });
   renderSongsList();
   persistSongs();
+  matchOfflineSongWithSpotify(targetEditorState, key, songDbEntry.name);
+}
+
+// 離線歌曲加入歌單後，若已連接 Spotify 就在背景嘗試比對同名歌曲，
+// 比對成功後補上封面縮圖與 spotifyUri，之後「加入播放清單」就不用再重新搜尋一次；
+// 純屬背景加值功能，失敗不影響操作也不跳錯誤提示
+async function matchOfflineSongWithSpotify(targetEditorState, key, songName) {
+  if (!isSpotifyConnected()) return;
+  try {
+    const match = await findBestTrackMatch(songName);
+    if (!match || editorState !== targetEditorState) return;
+    const song = editorState.songs.find((s) => s.key === key);
+    if (!song || isMarker(song)) return;
+    song.spotifyUri = match.uri;
+    song.spotifyId = match.id;
+    song.albumImage = match.albumImage || "";
+    renderSongsList();
+    persistSongs();
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 function addSpotifyTrackToSetlist(track) {
@@ -1069,6 +1100,7 @@ function addSpotifyTrackToSetlist(track) {
     artists: track.artists,
     spotifyUri: track.uri,
     spotifyId: track.id,
+    albumImage: track.albumImage || "",
   });
   renderSongsList();
   persistSongs();
@@ -1277,6 +1309,7 @@ function renderSongsList() {
         <div class="song-row" data-rowkey="${s.key}">
           <span class="drag-handle">${ICONS.grip}</span>
           <span class="song-row-num">${songNum}</span>
+          ${songThumbHTML(s.albumImage)}
           <span class="song-row-name">${
             s.source === "spotify" ? ICONS.spotifyDot + " " : ""
           }${escapeHTML(s.name)}${
@@ -1306,68 +1339,115 @@ function renderSongsList() {
 }
 
 let dragCtx = null;
+let pendingPress = null;
 
-// 拖曳排序：拖曳中的列直接用 transform 跟著手指位置即時移動，其餘列則平移讓出空位，
-// 放開後才真正重新排列 DOM／資料，比逐格判斷交換的舊做法流暢許多
+const LONG_PRESS_MS = 500; // 與 iOS 原生長按判斷時長一致
+const PRESS_MOVE_CANCEL_PX = 10; // 長按計時中若手指移動超過此距離，視為滑動而非拖曳意圖
+
+// 拖曳排序：需先長按觸發（避免誤觸），啟動後拖曳中的列直接用 transform 跟著手指位置
+// 即時移動，其餘列則平移讓出空位，放開後才真正重新排列 DOM／資料
 function attachDragHandlers(handle) {
   handle.addEventListener("pointerdown", (e) => {
     const row = handle.closest(".song-row");
     const container = document.getElementById("selected-songs-list");
     if (!row || !container) return;
 
-    const rows = [...container.querySelectorAll(".song-row")];
-    const rects = rows.map((r) => r.getBoundingClientRect());
-    const startIndex = rows.indexOf(row);
+    try {
+      handle.setPointerCapture(e.pointerId);
+    } catch (err) {
+      /* 部分情境（例如非真實硬體指標）setPointerCapture 會拋錯，不影響後續長按判斷 */
+    }
 
-    dragCtx = {
-      row,
-      rows,
-      rects,
-      startIndex,
-      currentIndex: startIndex,
-      startClientY: e.clientY,
-      rowHeight: rects[startIndex].height + 6, // 6px 對應 .song-list 的 gap
+    const pending = {
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      timer: null,
     };
-
-    row.classList.add("dragging");
-    row.style.transition = "none";
-    document.body.classList.add("no-select");
-    handle.setPointerCapture(e.pointerId);
-    if (navigator.vibrate) navigator.vibrate(10); // iOS Safari 不支援 Vibration API，此行在 iOS 上不會有作用
+    pending.timer = setTimeout(() => {
+      if (pendingPress !== pending) return;
+      pendingPress = null;
+      startDrag(row, container, pending.startY);
+    }, LONG_PRESS_MS);
+    pendingPress = pending;
   });
 
   handle.addEventListener("pointermove", (e) => {
-    if (!dragCtx) return;
-    const { row, rows, rects, startIndex, rowHeight } = dragCtx;
-    const deltaY = e.clientY - dragCtx.startClientY;
-    row.style.transform = `translateY(${deltaY}px)`;
-
-    const draggedCenter = rects[startIndex].top + rects[startIndex].height / 2 + deltaY;
-    let newIndex = 0;
-    rects.forEach((rect, i) => {
-      if (i === startIndex) return;
-      const otherCenter = rect.top + rect.height / 2;
-      if (otherCenter < draggedCenter) newIndex++;
-    });
-    dragCtx.currentIndex = newIndex;
-
-    rows.forEach((r, i) => {
-      if (i === startIndex) return;
-      const rank = i < startIndex ? i : i - 1;
-      let shift = 0;
-      if (i < startIndex && rank >= newIndex) shift = rowHeight;
-      else if (i > startIndex && rank < newIndex) shift = -rowHeight;
-      r.style.transform = shift ? `translateY(${shift}px)` : "";
-    });
+    if (dragCtx) {
+      updateDrag(e.clientY);
+      return;
+    }
+    if (pendingPress && pendingPress.pointerId === e.pointerId) {
+      const dist = Math.hypot(e.clientX - pendingPress.startX, e.clientY - pendingPress.startY);
+      if (dist > PRESS_MOVE_CANCEL_PX) {
+        clearTimeout(pendingPress.timer);
+        pendingPress = null;
+      }
+    }
   });
 
   handle.addEventListener("pointerup", () => {
+    if (pendingPress) {
+      clearTimeout(pendingPress.timer);
+      pendingPress = null;
+    }
     if (!dragCtx) return;
     finalizeSongOrder();
   });
 
   handle.addEventListener("pointercancel", () => {
+    if (pendingPress) {
+      clearTimeout(pendingPress.timer);
+      pendingPress = null;
+    }
     if (dragCtx) cleanupDrag();
+  });
+}
+
+function startDrag(row, container, startClientY) {
+  const rows = [...container.querySelectorAll(".song-row")];
+  const rects = rows.map((r) => r.getBoundingClientRect());
+  const startIndex = rows.indexOf(row);
+  if (startIndex === -1) return;
+
+  dragCtx = {
+    row,
+    rows,
+    rects,
+    startIndex,
+    currentIndex: startIndex,
+    startClientY,
+    rowHeight: rects[startIndex].height + 6, // 6px 對應 .song-list 的 gap
+  };
+
+  row.classList.add("dragging");
+  row.style.transition = "none";
+  document.body.classList.add("no-select");
+  if (navigator.vibrate) navigator.vibrate(10); // iOS Safari 不支援 Vibration API，此行在 iOS 上不會有作用
+}
+
+function updateDrag(clientY) {
+  if (!dragCtx) return;
+  const { row, rows, rects, startIndex, rowHeight } = dragCtx;
+  const deltaY = clientY - dragCtx.startClientY;
+  row.style.transform = `translateY(${deltaY}px)`;
+
+  const draggedCenter = rects[startIndex].top + rects[startIndex].height / 2 + deltaY;
+  let newIndex = 0;
+  rects.forEach((rect, i) => {
+    if (i === startIndex) return;
+    const otherCenter = rect.top + rect.height / 2;
+    if (otherCenter < draggedCenter) newIndex++;
+  });
+  dragCtx.currentIndex = newIndex;
+
+  rows.forEach((r, i) => {
+    if (i === startIndex) return;
+    const rank = i < startIndex ? i : i - 1;
+    let shift = 0;
+    if (i < startIndex && rank >= newIndex) shift = rowHeight;
+    else if (i > startIndex && rank < newIndex) shift = -rowHeight;
+    r.style.transform = shift ? `translateY(${shift}px)` : "";
   });
 }
 

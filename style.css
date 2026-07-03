@@ -535,6 +535,23 @@ textarea {
   border-bottom: none;
 }
 
+.song-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--surface-3);
+}
+
+.song-thumb-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
 .song-result-info {
   flex: 1;
   min-width: 0;
