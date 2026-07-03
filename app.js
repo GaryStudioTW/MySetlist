@@ -1090,18 +1090,23 @@ async function copySocialText(project) {
   if (!editorState) return;
 
   let songNum = 0;
-  const songLines = editorState.songs.map((s) => {
-    if (isMarker(s)) return `【${s.label}】`;
+  const songLines = [];
+  editorState.songs.forEach((s) => {
+    if (isMarker(s)) {
+      songLines.push(""); // 段落標記上方一律多一行空白行
+      songLines.push(`【${s.label}】`);
+      return;
+    }
     songNum++;
-    return `${songNum}. ${s.name}`;
+    songLines.push(`${songNum}. ${s.name}`);
   });
 
-  const text = [
-    project.name || "",
-    songLines.join("\n"),
-    project.note || "",
-    (project.tags || []).join(" "),
-  ].join("\n\n");
+  const blocks = [project.name || "", songLines.join("\n")];
+  const note = (project.note || "").trim();
+  if (note) blocks.push(note);
+  blocks.push((project.tags || []).join(" "));
+
+  const text = blocks.join("\n\n");
 
   try {
     await navigator.clipboard.writeText(text);
@@ -1302,68 +1307,99 @@ function renderSongsList() {
 
 let dragCtx = null;
 
+// 拖曳排序：拖曳中的列直接用 transform 跟著手指位置即時移動，其餘列則平移讓出空位，
+// 放開後才真正重新排列 DOM／資料，比逐格判斷交換的舊做法流暢許多
 function attachDragHandlers(handle) {
   handle.addEventListener("pointerdown", (e) => {
     const row = handle.closest(".song-row");
-    if (!row) return;
-    dragCtx = { row };
+    const container = document.getElementById("selected-songs-list");
+    if (!row || !container) return;
+
+    const rows = [...container.querySelectorAll(".song-row")];
+    const rects = rows.map((r) => r.getBoundingClientRect());
+    const startIndex = rows.indexOf(row);
+
+    dragCtx = {
+      row,
+      rows,
+      rects,
+      startIndex,
+      currentIndex: startIndex,
+      startClientY: e.clientY,
+      rowHeight: rects[startIndex].height + 6, // 6px 對應 .song-list 的 gap
+    };
+
     row.classList.add("dragging");
+    row.style.transition = "none";
+    document.body.classList.add("no-select");
     handle.setPointerCapture(e.pointerId);
+    if (navigator.vibrate) navigator.vibrate(10); // iOS Safari 不支援 Vibration API，此行在 iOS 上不會有作用
   });
 
   handle.addEventListener("pointermove", (e) => {
     if (!dragCtx) return;
-    const container = document.getElementById("selected-songs-list");
-    if (!container) return;
-    const rows = [...container.querySelectorAll(".song-row")];
-    const y = e.clientY;
-    const draggedRect = dragCtx.row.getBoundingClientRect();
-    for (const other of rows) {
-      if (other === dragCtx.row) continue;
-      const rect = other.getBoundingClientRect();
-      const mid = rect.top + rect.height / 2;
-      if (draggedRect.top < rect.top && y > mid) {
-        container.insertBefore(dragCtx.row, other.nextSibling);
-        break;
-      } else if (draggedRect.top > rect.top && y < mid) {
-        container.insertBefore(dragCtx.row, other);
-        break;
-      }
-    }
+    const { row, rows, rects, startIndex, rowHeight } = dragCtx;
+    const deltaY = e.clientY - dragCtx.startClientY;
+    row.style.transform = `translateY(${deltaY}px)`;
+
+    const draggedCenter = rects[startIndex].top + rects[startIndex].height / 2 + deltaY;
+    let newIndex = 0;
+    rects.forEach((rect, i) => {
+      if (i === startIndex) return;
+      const otherCenter = rect.top + rect.height / 2;
+      if (otherCenter < draggedCenter) newIndex++;
+    });
+    dragCtx.currentIndex = newIndex;
+
+    rows.forEach((r, i) => {
+      if (i === startIndex) return;
+      const rank = i < startIndex ? i : i - 1;
+      let shift = 0;
+      if (i < startIndex && rank >= newIndex) shift = rowHeight;
+      else if (i > startIndex && rank < newIndex) shift = -rowHeight;
+      r.style.transform = shift ? `translateY(${shift}px)` : "";
+    });
   });
 
   handle.addEventListener("pointerup", () => {
     if (!dragCtx) return;
-    dragCtx.row.classList.remove("dragging");
     finalizeSongOrder();
-    dragCtx = null;
   });
 
   handle.addEventListener("pointercancel", () => {
-    if (dragCtx) {
-      dragCtx.row.classList.remove("dragging");
-      dragCtx = null;
-    }
+    if (dragCtx) cleanupDrag();
   });
 }
 
-function finalizeSongOrder() {
-  if (!editorState) return;
+function cleanupDrag() {
   const container = document.getElementById("selected-songs-list");
-  if (!container) return;
-  const rows = [...container.querySelectorAll(".song-row")];
-  const newOrder = rows
-    .map((row) => editorState.songs.find((s) => String(s.key) === row.dataset.rowkey))
-    .filter(Boolean);
-  editorState.songs = newOrder;
-  let songNum = 0;
-  rows.forEach((row) => {
-    const numEl = row.querySelector(".song-row-num");
-    if (numEl) numEl.textContent = ++songNum;
-  });
-  if (document.getElementById("songs-count")) {
-    document.getElementById("songs-count").textContent = realSongCount(editorState.songs) + "首";
+  if (container) {
+    container.querySelectorAll(".song-row").forEach((r) => {
+      r.style.transform = "";
+      r.style.transition = "";
+      r.classList.remove("dragging");
+    });
   }
+  document.body.classList.remove("no-select");
+  dragCtx = null;
+}
+
+function finalizeSongOrder() {
+  if (!editorState || !dragCtx) {
+    cleanupDrag();
+    return;
+  }
+  const { rows, startIndex, currentIndex } = dragCtx;
+  if (startIndex !== currentIndex) {
+    const ordered = rows.map((row) =>
+      editorState.songs.find((s) => String(s.key) === row.dataset.rowkey)
+    );
+    const [dragged] = ordered.splice(startIndex, 1);
+    ordered.splice(currentIndex, 0, dragged);
+    editorState.songs = ordered;
+  }
+  cleanupDrag();
+  renderSongsList();
   persistSongs();
 }
 

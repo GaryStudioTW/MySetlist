@@ -84,6 +84,7 @@ input, textarea, select, button {
 }
 
 input, textarea, select {
+  width: 100%;
   background: var(--surface-2);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
@@ -130,7 +131,9 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 }
 
 .page {
-  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  /* 底部留較多深色緩衝空間，避免頁尾的 accent 色按鈕貼著螢幕邊緣，被 iOS Safari 的
+     工具列自動配色取樣到 */
+  padding: 16px 16px calc(28px + env(safe-area-inset-bottom));
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -412,6 +415,8 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   position: sticky;
   bottom: 0;
   padding-top: 12px;
+  /* 下方留深色緩衝空間，避免 iOS Safari 自動把工具列染成按鈕的 accent 色 */
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
   background: linear-gradient(to top, var(--bg) 60%, transparent);
   margin-top: auto;
 }
@@ -607,11 +612,18 @@ textarea {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 8px 10px;
+  transition: transform 0.15s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .song-row.dragging {
+  position: relative;
+  z-index: 5;
   background: var(--surface-3);
   border-color: var(--accent-border);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
 .drag-handle {
@@ -620,7 +632,15 @@ textarea {
   cursor: grab;
   display: flex;
   align-items: center;
-  padding: 2px;
+  padding: 8px 6px;
+  margin: -8px -6px;
+}
+
+/* 拖曳排序時暫時關閉整頁的文字選取，避免長按觸發 iOS 選字彈出選單 */
+body.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .song-row-num {
