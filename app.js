@@ -488,15 +488,57 @@ function renderHome() {
   });
 }
 
-function setSwipePanelWidths(wrap, offset) {
+// 複製／刪除的寬度分配：展開寬度（144px）以內兩者平分；超過之後（往刪除
+// 承諾距離靠近）複製線性縮小到 0，多出來的寬度全部給刪除吸收，讓刪除在
+// 快要滑到底時視覺上「取代」複製，提示使用者再滑下去會直接刪除
+function updateDeleteCopySplit(wrap, totalWidth, commitDistance) {
+  const copyBtn = wrap.querySelector(".pca-copy");
+  const deleteBtn = wrap.querySelector(".pca-delete");
+  if (!copyBtn || !deleteBtn) return;
+  let copyWidth;
+  if (totalWidth <= DELETE_ACTIONS_MIN_WIDTH) {
+    copyWidth = totalWidth / 2;
+  } else {
+    const shrinkRange = Math.max(1, commitDistance - DELETE_ACTIONS_MIN_WIDTH);
+    const progress = Math.min(1, (totalWidth - DELETE_ACTIONS_MIN_WIDTH) / shrinkRange);
+    copyWidth = (DELETE_ACTIONS_MIN_WIDTH / 2) * (1 - progress);
+  }
+  copyBtn.style.flex = "none";
+  copyBtn.style.width = `${copyWidth}px`;
+  deleteBtn.style.flex = "none";
+  deleteBtn.style.width = `${totalWidth - copyWidth}px`;
+}
+
+// 恢復成 CSS 預設的 flex:1 平分，靜止狀態（關閉、展開、觸發後）都用這個
+function resetDeleteCopySplit(wrap) {
+  const copyBtn = wrap.querySelector(".pca-copy");
+  const deleteBtn = wrap.querySelector(".pca-delete");
+  if (copyBtn) {
+    copyBtn.style.flex = "";
+    copyBtn.style.width = "";
+  }
+  if (deleteBtn) {
+    deleteBtn.style.flex = "";
+    deleteBtn.style.width = "";
+  }
+}
+
+function setSwipePanelWidths(wrap, offset, commitDistance) {
   const leftPanel = wrap.querySelector(".project-card-actions-left");
   const rightPanel = wrap.querySelector(".project-card-actions-right");
   if (offset >= 0) {
     leftPanel.style.width = `${offset}px`;
     rightPanel.style.width = "0px";
+    resetDeleteCopySplit(wrap);
   } else {
-    rightPanel.style.width = `${-offset}px`;
+    const width = -offset;
+    rightPanel.style.width = `${width}px`;
     leftPanel.style.width = "0px";
+    if (commitDistance) {
+      updateDeleteCopySplit(wrap, width, commitDistance);
+    } else {
+      resetDeleteCopySplit(wrap);
+    }
   }
 }
 
@@ -511,6 +553,7 @@ function closeSwipeCard(card) {
     rightPanel.style.transition = "width 0.2s ease";
     leftPanel.style.width = "0px";
     rightPanel.style.width = "0px";
+    resetDeleteCopySplit(wrap);
   }
 }
 
@@ -560,7 +603,7 @@ function attachSwipeHandlers(wrap) {
       const maxAbs = ctx.cardWidth * SWIPE_MAX_RATIO;
       const offset = Math.min(maxAbs, Math.max(-maxAbs, ctx.startOffset + dx));
       card.style.transform = `translateX(${offset}px)`;
-      setSwipePanelWidths(wrap, offset);
+      setSwipePanelWidths(wrap, offset, ctx.cardWidth * SWIPE_COMMIT_RATIO);
     }
   });
 
