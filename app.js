@@ -114,6 +114,14 @@ function getSongsBySection(songsDB) {
   return map;
 }
 
+// 已選歌單裡只存了 name/section，要拿英文歌名／專輯名輔助 Spotify 比對時
+// 回頭去離線資料庫查原始資料（資料庫這時應該已經載入過、有快取）
+function findOfflineSongEntry(name, section) {
+  if (!SONGS_BY_SECTION) return null;
+  const list = SONGS_BY_SECTION.get(section) || [];
+  return list.find((s) => s.name === name) || null;
+}
+
 // ----------------------------------------------------------------------------
 // 小型 SVG 圖示（內嵌，不依賴外部圖示字型，離線也能正常顯示）
 // ----------------------------------------------------------------------------
@@ -1064,19 +1072,10 @@ async function initSongBrowser() {
   doOfflineSearch("");
 }
 
-// 離線歌曲庫用的專輯名稱有時跟 Spotify 官方上架名稱完全不同（例如翻譯名 vs 原文
-// 名，兩者沒有共同字元，任何模糊比對演算法都救不回來），只能手動維護對照表。
-// 目前已確認的案例：離線資料庫的「Let's Go!」在 Spotify 上是用原文專輯名「衝啦!」
-// 上架。之後若還有歌曲配對錯誤且原因是專輯譯名不同，把新的一組加進這裡即可
-const ALBUM_NAME_OVERRIDES = {
-  "let's go!": "衝啦!",
-};
-
 // 離線歌曲庫的 section 是「編號.專輯名」格式（例如「01.Let's Go!」），
-// 拿去跟 Spotify 比對前先去掉編號前綴，並套用上面的專輯名稱對照表
+// 拿去跟 Spotify 比對前先去掉編號前綴
 function cleanAlbumHint(section) {
-  const cleaned = (section || "").replace(/^\d+\.\s*/, "").trim();
-  return ALBUM_NAME_OVERRIDES[cleaned.toLowerCase()] || cleaned;
+  return (section || "").replace(/^\d+\.\s*/, "").trim();
 }
 
 function addSongToSetlist(songDbEntry) {
@@ -1090,19 +1089,21 @@ function addSongToSetlist(songDbEntry) {
   });
   renderSongsList();
   persistSongs();
-  matchOfflineSongWithSpotify(targetEditorState, key, songDbEntry.name, songDbEntry.section);
+  matchOfflineSongWithSpotify(targetEditorState, key, songDbEntry);
 }
 
 // 離線歌曲加入歌單後，若已連接 Spotify 就在背景嘗試比對同名歌曲，
 // 比對成功後補上封面縮圖與 spotifyUri，之後「加入播放清單」就不用再重新搜尋一次；
 // 純屬背景加值功能，失敗不影響操作也不跳錯誤提示
-async function matchOfflineSongWithSpotify(targetEditorState, key, songName, section) {
+async function matchOfflineSongWithSpotify(targetEditorState, key, songDbEntry) {
   if (!isSpotifyConnected()) return;
   try {
     const match = await findBestTrackMatch(
-      songName,
+      songDbEntry.name,
       targetEditorState.band,
-      cleanAlbumHint(section)
+      cleanAlbumHint(songDbEntry.section),
+      songDbEntry.nameEn,
+      songDbEntry.sectionEn
     );
     if (!match || editorState !== targetEditorState) return;
     const song = editorState.songs.find((s) => s.key === key);
@@ -1273,10 +1274,13 @@ async function runAddToSpotifyPlaylist(playlistId, bodyEl, close) {
       if (s.spotifyUri) {
         uris.push(s.spotifyUri);
       } else {
+        const dbEntry = findOfflineSongEntry(s.name, s.section);
         const match = await findBestTrackMatch(
           s.name,
           editorState.band,
-          cleanAlbumHint(s.section)
+          cleanAlbumHint(s.section),
+          dbEntry?.nameEn,
+          dbEntry?.sectionEn
         );
         if (match) uris.push(match.uri);
         else unmatched++;

@@ -235,30 +235,45 @@ function looseMatch(a, b) {
   return na === nb || na.includes(nb) || nb.includes(na);
 }
 
-// 從候選清單中挑出最合適的一筆：
+// 從候選清單中挑出最合適的一筆，並回報這筆結果有多可信：
 // 1. 先篩出「歌名」寬鬆比對得上的候選（避免抓到完全不同的歌）
 // 2. 若提供專輯提示，優先在這些候選中找專輯也對得上的（避開精選輯／重新收錄版）
-// 3. 都對不上就退回篩選後的第一筆，完全沒有歌名相符的候選才用原始排序第一筆
+//    → 歌名、專輯都對得上時視為「高信心」結果
+// 3. 都對不上就退回篩選後的第一筆（僅歌名相符，視為「低信心」），
+//    完全沒有歌名相符的候選才用原始排序第一筆
 function pickBestMatch(candidates, songName, album) {
-  if (!candidates.length) return null;
+  if (!candidates.length) return { track: null, confident: false };
   const nameMatched = candidates.filter((c) => looseMatch(c.name, songName));
   const pool = nameMatched.length ? nameMatched : candidates;
   if (album && album.trim()) {
     const albumMatched = pool.find((c) => looseMatch(c.album, album));
-    if (albumMatched) return albumMatched;
+    if (albumMatched) return { track: albumMatched, confident: true };
   }
-  return pool[0];
+  return { track: pool[0], confident: false };
 }
 
-// 不用 track:/artist: 這類精確欄位篩選（太容易因為標點、譯名差異就直接比對不到、
-// 完全沒有候選可挑），改用單純的關鍵字搜尋抓多筆候選回來，交給前端自己用寬鬆
-// 比對挑出歌名、專輯都最相符的一筆
-export async function findBestTrackMatch(songName, artist, album) {
-  if (artist && artist.trim()) {
-    const candidates = await searchSpotifyTracks(`${artist} ${songName}`, 10);
-    const pick = pickBestMatch(candidates, songName, album);
-    if (pick) return pick;
+// 離線歌曲庫的中文歌名／專輯名有時候跟 Spotify 上架用的名稱完全不同（翻譯名、
+// 日文版標題等，彼此沒有共同字元，任何模糊比對都救不回來），所以有英文名稱時
+// 會兩種都試：優先試英文（歌名+專輯都對得上才採用），對不上再試中文，
+// 兩者都沒有「高信心」結果時，才使用比對到的第一筆當退路
+export async function findBestTrackMatch(songName, artist, album, songNameEn, albumEn) {
+  const variants = [];
+  if (songNameEn && songNameEn.trim() && !looseMatch(songNameEn, songName)) {
+    variants.push({ name: songNameEn, album: albumEn || album });
   }
+  variants.push({ name: songName, album });
+
+  let fallback = null;
+  if (artist && artist.trim()) {
+    for (const variant of variants) {
+      const candidates = await searchSpotifyTracks(`${artist} ${variant.name}`, 10);
+      const { track, confident } = pickBestMatch(candidates, variant.name, variant.album);
+      if (track && confident) return track;
+      if (track && !fallback) fallback = track;
+    }
+  }
+  if (fallback) return fallback;
+
   const results = await searchSpotifyTracks(songName, 1);
   return results[0] || null;
 }

@@ -1,1122 +1,1478 @@
 [
-  {
-    "name": "Let’s Go",
-    "codes": [
-      "1-1"
-    ],
-    "lyric": "生長在這個悲哀的時代",
-    "section": "01.Let's Go!"
-  },
-  {
-    "name": "Passaway",
-    "codes": [
-      "1-2"
-    ],
-    "lyric": "懷念過去 一切都不再回來",
-    "section": "01.Let's Go!"
-  },
-  {
-    "name": "Wake Up My Friend",
-    "codes": [
-      "1-3",
-      "Wake"
-    ],
-    "lyric": "終於我們不必再承受 他們不同的眼光 他們不屑的笑容",
-    "section": "01.Let's Go!"
-  },
-  {
-    "name": "新歌一號",
-    "codes": [
-      "1-4",
-      "n1"
-    ],
-    "lyric": "離開了春天來了一個沒有名子的季節",
-    "section": "01.Let's Go!"
-  },
-  {
-    "name": "螺旋",
-    "codes": [
-      "1-5"
-    ],
-    "lyric": "找不到出口究竟在哪裡 喔",
-    "section": "01.Let's Go!"
-  },
-  {
-    "name": "悲歌",
-    "codes": [
-      "1-6",
-      "sad"
-    ],
-    "lyric": "目睭拄褫開的我 這馬是下晡三點半",
-    "section": "01.Let's Go!"
-  },
-  {
-    "name": "人生",
-    "codes": [
-      "1-7"
-    ],
-    "lyric": "一張白紙 踮在這个彩色世界 變成你佮我",
-    "section": "01.Let's Go!"
-  },
-  {
-    "name": "新歌二號",
-    "codes": [
-      "1-8",
-      "n2"
-    ],
-    "lyric": "阮將吉他插上導線 唱出每一條歌",
-    "section": "01.Let's Go!"
-  },
-  {
-    "name": "革命",
-    "codes": [
-      "1-9",
-      "rev"
-    ],
-    "lyric": "My friend, do you understand 我們一直都在這裡 從沒有放棄",
-    "section": "01.Let's Go!"
-  },
-  {
-    "name": "麻痺",
-    "codes": [
-      "1-10"
-    ],
-    "lyric": "忽然發現自己什麼都沒有 在清醒之後",
-    "section": "01.Let's Go!"
-  },
-  {
-    "name": "我們的墮落",
-    "codes": [
-      "1-11",
-      "fall"
-    ],
-    "lyric": "你敢有聽到阮的心聲",
-    "section": "01.Let's Go!"
-  },
-  {
-    "name": "十九",
-    "codes": [
-      "1-12"
-    ],
-    "lyric": "猜測在我心中打了個結",
-    "section": "01.Let's Go!"
-  },
-  {
-    "name": "光明的路",
-    "codes": [
-      "1-13"
-    ],
-    "lyric": "冬天的風吹來冷冷的雨",
-    "section": "01.Let's Go!"
-  },
-  {
-    "name": "我在哪裡",
-    "codes": [
-      "1-14"
-    ],
-    "lyric": "毋知家己佇佗位",
-    "section": "01.Let's Go!"
-  },
-  {
-    "name": "惡夢9125",
-    "codes": [
-      "2-1"
-    ],
-    "lyric": "對惡夢之中驚醒",
-    "section": "02.海上的人"
-  },
-  {
-    "name": "日子",
-    "codes": [
-      "2-2"
-    ],
-    "lyric": "光線飄佇空中 照映著你的悲傷",
-    "section": "02.海上的人"
-  },
-  {
-    "name": "自由路",
-    "codes": [
-      "2-3",
-      "freedom"
-    ],
-    "lyric": "真理佇佗位 是非佇佗位",
-    "section": "02.海上的人"
-  },
-  {
-    "name": "舊照片",
-    "codes": [
-      "2-4"
-    ],
-    "lyric": "相片內 你的面 寫著滿滿的志氣",
-    "section": "02.海上的人"
-  },
-  {
-    "name": "晚安台灣",
-    "codes": [
-      "2-5"
-    ],
-    "lyric": "佇這个安靜的暗暝",
-    "section": "02.海上的人"
-  },
-  {
-    "name": "黃昏公路",
-    "codes": [
-      "2-6"
-    ],
-    "lyric": "黃昏公路吹著風",
-    "section": "02.海上的人"
-  },
-  {
-    "name": "夏天結束以前",
-    "codes": [
-      "2-7"
-    ],
-    "lyric": "我緊握著手 冷汗直流",
-    "section": "02.海上的人"
-  },
-  {
-    "name": "你家爆炸我沒有哭",
-    "codes": [
-      "2-8",
-      "boom"
-    ],
-    "lyric": "憂頭結面 印堂發烏 為何遮失志",
-    "section": "02.海上的人"
-  },
-  {
-    "name": "朋友歌",
-    "codes": [
-      "2-9",
-      "friend"
-    ],
-    "lyric": "老朋友 這是寫予你的歌",
-    "section": "02.海上的人"
-  },
-  {
-    "name": "船長",
-    "codes": [
-      "2-10"
-    ],
-    "lyric": "",
-    "section": "02.海上的人"
-  },
-  {
-    "name": "海上的人",
-    "codes": [
-      "2-11"
-    ],
-    "lyric": "越頭看彼段青春的路程",
-    "section": "02.海上的人"
-  },
-  {
-    "name": "站在這裡",
-    "codes": [
-      "2-12"
-    ],
-    "lyric": "徛佇遮 冬天的海岸",
-    "section": "02.海上的人"
-  },
-  {
-    "name": "再會！青春",
-    "codes": [
-      "3-1"
-    ],
-    "lyric": "",
-    "section": "03.再會！青春"
-  },
-  {
-    "name": "欲走無路",
-    "codes": [
-      "3-2"
-    ],
-    "lyric": "捾著行李 毋情毋願 坐上彼幫車",
-    "section": "03.再會！青春"
-  },
-  {
-    "name": "天鳥",
-    "codes": [
-      "3-3",
-      "freebird",
-      "bird"
-    ],
-    "lyric": "春夏秋冬我已經無感覺",
-    "section": "03.再會！青春"
-  },
-  {
-    "name": "新歌三號",
-    "codes": [
-      "3-4",
-      "n3"
-    ],
-    "lyric": "沸騰的自己消失在漩渦裡",
-    "section": "03.再會！青春"
-  },
-  {
-    "name": "同學會",
-    "codes": [
-      "3-5",
-      "classmate",
-      "class"
-    ],
-    "lyric": "離開戰爭般的生活",
-    "section": "03.再會！青春"
-  },
-  {
-    "name": "無力者哀歌",
-    "codes": [
-      "3-6",
-      "fuck"
-    ],
-    "lyric": "敢有聽著怪手的聲 彼是咧拆咱的厝",
-    "section": "03.再會！青春"
-  },
-  {
-    "name": "頂樓天光",
-    "codes": [
-      "3-7"
-    ],
-    "lyric": "踮在五坪的房間",
-    "section": "03.再會！青春"
-  },
-  {
-    "name": "心內話",
-    "codes": [
-      "3-8"
-    ],
-    "lyric": "熟似的聲 問我食飽未",
-    "section": "03.再會！青春"
-  },
-  {
-    "name": "憂愁戀歌",
-    "codes": [
-      "3-9"
-    ],
-    "lyric": "你敢知相思 是啥滋味",
-    "section": "03.再會！青春"
-  },
-  {
-    "name": "崩潰世代",
-    "codes": [
-      "3-10"
-    ],
-    "lyric": "希望我有個淫蕩的朋友",
-    "section": "03.再會！青春"
-  },
-  {
-    "name": "我的廢人朋友",
-    "codes": [
-      "3-11"
-    ],
-    "lyric": "半暝三更睏袂去 無聊的暗暝",
-    "section": "03.再會！青春"
-  },
-  {
-    "name": "基隆路",
-    "codes": [
-      "4-1",
-      "klr"
-    ],
-    "lyric": "為著啥物四界走傱 為著啥物失去理想",
-    "section": "04.REBORN"
-  },
-  {
-    "name": "最後兩禮拜",
-    "codes": [
-      "4-2",
-      "week",
-      "2w"
-    ],
-    "lyric": "你感覺無趣味 所以我失去你的愛",
-    "section": "04.REBORN"
-  },
-  {
-    "name": "Don't You Fight",
-    "codes": [
-      "4-3",
-      "dyf"
-    ],
-    "lyric": "The story's been left behind",
-    "section": "04.REBORN"
-  },
-  {
-    "name": "十字路口",
-    "codes": [
-      "4-4"
-    ],
-    "lyric": "生活佇一个無聲的世界",
-    "section": "04.REBORN"
-  },
-  {
-    "name": "台11",
-    "codes": [
-      "4-5",
-      "11"
-    ],
-    "lyric": "一个人開著車 駛向東海岸",
-    "section": "04.REBORN"
-  },
-  {
-    "name": "南國的風",
-    "codes": [
-      "4-6"
-    ],
-    "lyric": "又閣咧落雨 已經落規下晡",
-    "section": "04.REBORN"
-  },
-  {
-    "name": "新歌四號",
-    "codes": [
-      "4-7",
-      "n4"
-    ],
-    "lyric": "夭壽 你夭壽可愛 我歹勢予人知",
-    "section": "04.REBORN"
-  },
-  {
-    "name": "今天喝酒了",
-    "codes": [
-      "4-8",
-      "drink"
-    ],
-    "lyric": "今天喝酒了 昨天也有喝",
-    "section": "04.REBORN"
-  },
-  {
-    "name": "繼續向前行",
-    "codes": [
-      "4-9"
-    ],
-    "lyric": "鉸掉頭鬃 面對新的一工",
-    "section": "04.REBORN"
-  },
-  {
-    "name": "石垣好朋友",
-    "codes": [
-      "4-10"
-    ],
-    "lyric": "再會啦我的朋友 佇分開這个下晡",
-    "section": "04.REBORN"
-  },
-  {
-    "name": "最後一個",
-    "codes": [
-      "4-11"
-    ],
-    "lyric": "等風吹落地 等日頭落山",
-    "section": "04.REBORN"
-  },
-  {
-    "name": "早安台灣",
-    "codes": [
-      "4-12",
-      "nd"
-    ],
-    "lyric": "早起五點外 開門的早頓店",
-    "section": "04.REBORN"
-  },
-  {
-    "name": "無名英雄",
-    "codes": [
-      "w1"
-    ],
-    "lyric": "趕走所有無路用的悲傷",
-    "section": "05.無名英雄"
-  },
-  {
-    "name": "生活革命",
-    "codes": [
-      "w2"
-    ],
-    "lyric": "最近我感覺規个人訕訕",
-    "section": "05.無名英雄"
-  },
-  {
-    "name": "雙城記",
-    "codes": [
-      "w3",
-      "hk"
-    ],
-    "lyric": "無辜的人 昨天已犯了明天的罪",
-    "section": "05.無名英雄"
-  },
-  {
-    "name": "一九四五",
-    "codes": [
-      "w4",
-      "1945"
-    ],
-    "lyric": "月 暗淡的光線 照著僥倖的人",
-    "section": "05.無名英雄"
-  },
-  {
-    "name": "百年追求",
-    "codes": [
-      "w5",
-      "100y",
-      "w100"
-    ],
-    "lyric": "布條 傳單 宣傳車 欲上街頭的綴我行",
-    "section": "05.無名英雄"
-  },
-  {
-    "name": "少年家",
-    "codes": [
-      "w6",
-      "young"
-    ],
-    "lyric": "嘿 少年家 你欲行去佗",
-    "section": "05.無名英雄"
-  },
-  {
-    "name": "海島冒險王",
-    "codes": [
-      "w7",
-      "k2"
-    ],
-    "lyric": "這是渺小的一天 也是偉大的一天",
-    "section": "05.無名英雄"
-  },
-  {
-    "name": "新歌五號",
-    "codes": [
-      "w8",
-      "n5"
-    ],
-    "lyric": "Oh California So we meet again",
-    "section": "05.無名英雄"
-  },
-  {
-    "name": "十二月的妳",
-    "codes": [
-      "w9",
-      "dec",
-      "12y"
-    ],
-    "lyric": "又閣來到你的城市",
-    "section": "05.無名英雄"
-  },
-  {
-    "name": "航向遠方的船",
-    "codes": [
-      "w10"
-    ],
-    "lyric": "你說自由就像一陣風",
-    "section": "05.無名英雄"
-  },
-  {
-    "name": "The Light",
-    "codes": [
-      "light"
-    ],
-    "lyric": "揺れる向日葵 君の手を確かめた",
-    "section": "05.無名英雄"
-  },
-  {
-    "name": "人間條件",
-    "codes": [
-      "j1"
-    ],
-    "lyric": "歡迎來到這个世界 爸爸是一个音樂家",
-    "section": "06.家和萬事興"
-  },
-  {
-    "name": "新歌六號",
-    "codes": [
-      "j2",
-      "n6"
-    ],
-    "lyric": "1999 八月二十三",
-    "section": "06.家和萬事興"
-  },
-  {
-    "name": "火山戀曲",
-    "codes": [
-      "j3",
-      "fire"
-    ],
-    "lyric": "啥人將我修理好勢 規个生活攏為你戇戇踅",
-    "section": "06.家和萬事興"
-  },
-  {
-    "name": "一百夜",
-    "codes": [
-      "j4",
-      "100n"
-    ],
-    "lyric": "我應該離開 這个無你的城市",
-    "section": "06.家和萬事興"
-  },
-  {
-    "name": "新世界的光",
-    "codes": [
-      "j5"
-    ],
-    "lyric": "轉大人 是告別一段混沌青春",
-    "section": "06.家和萬事興"
-  },
-  {
-    "name": "來坐",
-    "codes": [
-      "j6"
-    ],
-    "lyric": "來喔來喔入來坐 免客氣免歹勢",
-    "section": "06.家和萬事興"
-  },
-  {
-    "name": "最後一個",
-    "codes": [
-      "j7",
-      "last"
-    ],
-    "lyric": "等風吹落地 等日頭落山",
-    "section": "06.家和萬事興"
-  },
-  {
-    "name": "給女兒",
-    "codes": [
-      "j8",
-      "girl"
-    ],
-    "lyric": "我的查某囝 穿著新娘衫",
-    "section": "06.家和萬事興"
-  },
-  {
-    "name": "家和萬事興",
-    "codes": [
-      "j9",
-      "home",
-      "家和"
-    ],
-    "lyric": "房間內黃色電火是唯一的光",
-    "section": "06.家和萬事興"
-  },
-  {
-    "name": "人生尾路",
-    "codes": [
-      "j10",
-      "die"
-    ],
-    "lyric": "原諒我先行一步 相信咱會閣相逢",
-    "section": "06.家和萬事興"
-  },
-  {
-    "name": "Song For You",
-    "codes": [
-      "SFY"
-    ],
-    "lyric": "Look at the sun shining so hard",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "Let’s Go",
-    "codes": [
-      "let",
-      "go"
-    ],
-    "lyric": "生長在這個悲哀的時代",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "Passaway",
-    "codes": [
-      "pass",
-      "away"
-    ],
-    "lyric": "懷念過去",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "惡夢9125",
-    "codes": [
-      "9125"
-    ],
-    "lyric": "對惡夢之中驚醒",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "日子",
-    "codes": [
-      "days"
-    ],
-    "lyric": "光線飄佇空中 照映著你的悲傷",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "舊照片",
-    "codes": [
-      "OP"
-    ],
-    "lyric": "相片內 你的面 寫了滿滿的志氣",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "夏天結束以前",
-    "codes": [
-      "summer"
-    ],
-    "lyric": "我緊握著手 冷汗直流",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "南國的風",
-    "codes": [
-      "south",
-      "wind"
-    ],
-    "lyric": "又閣咧落雨 已經落規下晡",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "黃昏公路",
-    "codes": [
-      "sunset"
-    ],
-    "lyric": "黃昏公路吹著風",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "海上的人",
-    "codes": [
-      "amots",
-      "sea"
-    ],
-    "lyric": "越頭看彼段青春的路程",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "晚安台灣",
-    "codes": [
-      "gntw",
-      "gn"
-    ],
-    "lyric": "佇這个安靜的暗暝",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "島嶼天光",
-    "codes": [
-      "318"
-    ],
-    "lyric": "親愛的媽媽 請你毋通煩惱我",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "我在哪裡",
-    "codes": [
-      "where"
-    ],
-    "lyric": "毋知家己佇佗位 行入橋跤迷魂陣",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "欲走無路",
-    "codes": [
-      "run"
-    ],
-    "lyric": "捾咧行李 毋情毋願 坐上彼班車",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "憂愁戀歌",
-    "codes": [
-      "super"
-    ],
-    "lyric": "你敢知相思 是啥滋味",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "頂樓天光",
-    "codes": [
-      "頂樓"
-    ],
-    "lyric": "踮在五坪的房間 異鄉的過客",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "十九",
-    "codes": [
-      "19"
-    ],
-    "lyric": "猜測在我心中打了個結",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "人生",
-    "codes": [
-      "life"
-    ],
-    "lyric": "一張白紙 踮在這个彩色世界 變成你佮我",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "站在這裡",
-    "codes": [
-      "stand"
-    ],
-    "lyric": "徛佇遮 冬天的海岸",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "長途夜車",
-    "codes": [
-      "bus"
-    ],
-    "lyric": "時間是三點半",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "繼續向前行",
-    "codes": [
-      "kog"
-    ],
-    "lyric": "鉸掉頭鬃 面對新的一工",
-    "section": "00.進擊下半場"
-  },
-  {
-    "name": "Back to the world",
-    "codes": [
-      "back"
-    ],
-    "lyric": "Dear my friend 你為何沉默",
-    "section": "00.單曲"
-  },
-  {
-    "name": "Super Monkeys",
-    "codes": [
-      "Monkey"
-    ],
-    "lyric": "若是欲和人輸贏的時 愛提出一定贏的殺氣",
-    "section": "00.單曲"
-  },
-  {
-    "name": "曾經瘋狂",
-    "codes": [
-      "曾經"
-    ],
-    "lyric": "曾經瘋狂 你專注的模樣",
-    "section": "00.單曲"
-  },
-  {
-    "name": "永遠不回頭 - 小宇宙燃燒版",
-    "codes": [
-      "永遠不回頭"
-    ],
-    "lyric": "在天色破曉之前 我想要爬上山顛",
-    "section": "00.單曲"
-  },
-  {
-    "name": "桃猿戰士",
-    "codes": [
-      "桃猿"
-    ],
-    "lyric": "讓我們全副武裝 重返榮耀戰場",
-    "section": "00.單曲"
-  },
-  {
-    "name": "更遠的前方",
-    "codes": [
-      "更遠"
-    ],
-    "lyric": "嘿 你知道嗎 我一直相信著",
-    "section": "00.單曲"
-  },
-  {
-    "name": "兼愛非攻",
-    "codes": [
-      "兼愛"
-    ],
-    "lyric": "",
-    "section": "00.單曲"
-  },
-  {
-    "name": "永遠的 Lamigo",
-    "codes": [
-      "Lamigo"
-    ],
-    "lyric": "喔 我們是永遠的Lamigo",
-    "section": "00.單曲"
-  },
-  {
-    "name": "自信勇敢咱的名",
-    "codes": [
-      "自信勇敢"
-    ],
-    "lyric": "用恁送我的萬年筆 將心內的話寫佇批紙",
-    "section": "00.單曲"
-  },
-  {
-    "name": "戰勝是唯一的路",
-    "codes": [
-      "戰勝"
-    ],
-    "lyric": "想撐起一片天 練習著一遍又一遍",
-    "section": "00.單曲"
-  },
-  {
-    "name": "希望的明日",
-    "codes": [
-      "希望"
-    ],
-    "lyric": "沒能實現每年都要見面的願望",
-    "section": "00.單曲"
-  },
-  {
-    "name": "一起更強",
-    "codes": [],
-    "lyric": "When we fight together We will be stronger",
-    "section": "00.單曲"
-  },
-  {
-    "name": "本性倔強",
-    "codes": [],
-    "lyric": "往事就予伊隨風 放下過去行新的道路",
-    "section": "00.單曲"
-  },
-  {
-    "name": "高雄驛起飛",
-    "codes": [
-      "高雄"
-    ],
-    "lyric": "閣一幫火車 漸漸欲起行",
-    "section": "00.單曲"
-  },
-  {
-    "name": "好膽來技較",
-    "codes": [],
-    "lyric": "心中那一份執著 帶領著我往前走",
-    "section": "00.單曲"
-  },
-  {
-    "name": "來坐",
-    "codes": [],
-    "lyric": "來喔來喔入來坐 免客氣免歹勢",
-    "section": "00.單曲"
-  },
-  {
-    "name": "RISE UP",
-    "codes": [],
-    "lyric": "Rise up again 讓榮耀重現 We are the best oh Rakuten",
-    "section": "00.單曲"
-  },
-  {
-    "name": "時鐘霆矣",
-    "codes": [],
-    "lyric": "天猶未光 猶有時間決定",
-    "section": "00.單曲"
-  },
-  {
-    "name": "超級英雄",
-    "codes": [],
-    "lyric": "任務開始之前 有些事你要知道",
-    "section": "00.單曲"
-  },
-  {
-    "name": "Pay Money to Wonderland",
-    "codes": [
-      "fireball"
-    ],
-    "lyric": "You pay me money I make you happy",
-    "section": "00.單曲"
-  },
-  {
-    "name": "最重要的事",
-    "codes": [
-      "最重要"
-    ],
-    "lyric": "我們不會忘記那些日子更不想要再經歷一次",
-    "section": "00.單曲"
-  },
-  {
-    "name": "公賣局的酒香",
-    "codes": [
-      "公賣局"
-    ],
-    "lyric": "溫柔的風輕輕吹過百年的酒廠",
-    "section": "00.單曲"
-  },
-  {
-    "name": "今天的我",
-    "codes": [
-      "今天",
-      "冠軍"
-    ],
-    "lyric": "今天的我 會超越你想像的極限",
-    "section": "00.單曲"
-  },
-  {
-    "name": "牽亡歌，再陪你多走一段",
-    "codes": [
-      "牽亡"
-    ],
-    "lyric": "謹請本壇諸猛將不捨慈悲降落壇",
-    "section": "00.單曲"
-  },
-  {
-    "name": "残像モーション feat.磯部正文",
-    "codes": [],
-    "lyric": "",
-    "section": "04.REBORN(JP)"
-  },
-  {
-    "name": "Keelung Road",
-    "codes": [],
-    "lyric": "",
-    "section": "04.REBORN(JP)"
-  },
-  {
-    "name": "Last Two Weeks",
-    "codes": [],
-    "lyric": "",
-    "section": "04.REBORN(JP)"
-  },
-  {
-    "name": "Don't You Fight feat. 細美武士",
-    "codes": [],
-    "lyric": "",
-    "section": "04.REBORN(JP)"
-  },
-  {
-    "name": "おやすみ台湾 晚安台灣 日本語Ver.",
-    "codes": [],
-    "lyric": "",
-    "section": "04.REBORN(JP)"
-  },
-  {
-    "name": "Crossroad",
-    "codes": [],
-    "lyric": "",
-    "section": "04.REBORN(JP)"
-  },
-  {
-    "name": "Southern Wind",
-    "codes": [],
-    "lyric": "",
-    "section": "04.REBORN(JP)"
-  },
-  {
-    "name": "You Give Love a Good Name",
-    "codes": [],
-    "lyric": "",
-    "section": "04.REBORN(JP)"
-  },
-  {
-    "name": "Highway 11",
-    "codes": [],
-    "lyric": "",
-    "section": "04.REBORN(JP)"
-  },
-  {
-    "name": "Keep on Going",
-    "codes": [],
-    "lyric": "",
-    "section": "04.REBORN(JP)"
-  },
-  {
-    "name": "Re:Hellow",
-    "codes": [],
-    "lyric": "",
-    "section": "04.REBORN(JP)"
-  },
-  {
-    "name": "To Her",
-    "codes": [],
-    "lyric": "",
-    "section": "04.REBORN(JP)"
-  },
-  {
-    "name": "A New Day",
-    "codes": [],
-    "lyric": "",
-    "section": "04.REBORN(JP)"
-  },
-  {
-    "name": "この島の夜明け 島嶼天光 日本語Ver.",
-    "codes": [],
-    "lyric": "",
-    "section": "04.REBORN(JP)"
-  },
-  {
-    "name": "The Light feat.後藤 正文",
-    "codes": [],
-    "lyric": "",
-    "section": "05.Unsung Heroes"
-  },
-  {
-    "name": "無名英雄",
-    "codes": [],
-    "lyric": "",
-    "section": "05.Unsung Heroes"
-  },
-  {
-    "name": "生活革命",
-    "codes": [],
-    "lyric": "",
-    "section": "05.Unsung Heroes"
-  },
-  {
-    "name": "雙城記",
-    "codes": [],
-    "lyric": "",
-    "section": "05.Unsung Heroes"
-  },
-  {
-    "name": "一九四五",
-    "codes": [],
-    "lyric": "",
-    "section": "05.Unsung Heroes"
-  },
-  {
-    "name": "百年追求",
-    "codes": [],
-    "lyric": "",
-    "section": "05.Unsung Heroes"
-  },
-  {
-    "name": "少年家",
-    "codes": [],
-    "lyric": "",
-    "section": "05.Unsung Heroes"
-  },
-  {
-    "name": "海の風 feat.磯部 正文 (海上的人 日本語 Ver.)",
-    "codes": [],
-    "lyric": "",
-    "section": "05.Unsung Heroes"
-  },
-  {
-    "name": "海島冒險王",
-    "codes": [],
-    "lyric": "",
-    "section": "05.Unsung Heroes"
-  },
-  {
-    "name": "新歌五號",
-    "codes": [],
-    "lyric": "",
-    "section": "05.Unsung Heroes"
-  },
-  {
-    "name": "12月の君へ (十二月的妳 日本語 Ver.)",
-    "codes": [],
-    "lyric": "",
-    "section": "05.Unsung Heroes"
-  },
-  {
-    "name": "航向遠方的船",
-    "codes": [],
-    "lyric": "",
-    "section": "05.Unsung Heroes"
-  },
-  {
-    "name": "夜行バス (長途夜車 日本語 Ver.)",
-    "codes": [],
-    "lyric": "",
-    "section": "05.Unsung Heroes"
-  },
-  {
-    "name": "Keep On Going (繼續向前行 日本語 Ver.)",
-    "codes": [],
-    "lyric": "",
-    "section": "05.Unsung Heroes"
-  }
+    {
+        "name":  "Let’s Go",
+        "codes":  [
+                      "1-1"
+                  ],
+        "lyric":  "生長在這個悲哀的時代",
+        "nameEn":  "Let's Go",
+        "section":  "01.Let's Go!",
+        "sectionEn":  "Let's Go!"
+    },
+    {
+        "name":  "Passaway",
+        "codes":  [
+                      "1-2"
+                  ],
+        "lyric":  "懷念過去 一切都不再回來",
+        "nameEn":  "Passaway",
+        "section":  "01.Let's Go!",
+        "sectionEn":  "Let's Go!"
+    },
+    {
+        "name":  "Wake Up My Friend",
+        "codes":  [
+                      "1-3",
+                      "Wake"
+                  ],
+        "lyric":  "終於我們不必再承受 他們不同的眼光 他們不屑的笑容",
+        "nameEn":  "Wake Up My Friend",
+        "section":  "01.Let's Go!",
+        "sectionEn":  "Let's Go!"
+    },
+    {
+        "name":  "新歌一號",
+        "codes":  [
+                      "1-4",
+                      "n1"
+                  ],
+        "lyric":  "離開了春天來了一個沒有名子的季節",
+        "nameEn":  "New Song 1",
+        "section":  "01.Let's Go!",
+        "sectionEn":  "Let's Go!"
+    },
+    {
+        "name":  "螺旋",
+        "codes":  [
+                      "1-5"
+                  ],
+        "lyric":  "找不到出口究竟在哪裡 喔",
+        "nameEn":  "Circle",
+        "section":  "01.Let's Go!",
+        "sectionEn":  "Let's Go!"
+    },
+    {
+        "name":  "悲歌",
+        "codes":  [
+                      "1-6",
+                      "sad"
+                  ],
+        "lyric":  "目睭拄褫開的我 這馬是下晡三點半",
+        "nameEn":  "Sad Song",
+        "section":  "01.Let's Go!",
+        "sectionEn":  "Let's Go!"
+    },
+    {
+        "name":  "人生",
+        "codes":  [
+                      "1-7"
+                  ],
+        "lyric":  "一張白紙 踮在這个彩色世界 變成你佮我",
+        "nameEn":  "Life",
+        "section":  "01.Let's Go!",
+        "sectionEn":  "Let's Go!"
+    },
+    {
+        "name":  "新歌二號",
+        "codes":  [
+                      "1-8",
+                      "n2"
+                  ],
+        "lyric":  "阮將吉他插上導線 唱出每一條歌",
+        "nameEn":  "New Song 2",
+        "section":  "01.Let's Go!",
+        "sectionEn":  "Let's Go!"
+    },
+    {
+        "name":  "革命",
+        "codes":  [
+                      "1-9",
+                      "rev"
+                  ],
+        "lyric":  "My friend, do you understand 我們一直都在這裡 從沒有放棄",
+        "nameEn":  "Revolution",
+        "section":  "01.Let's Go!",
+        "sectionEn":  "Let's Go!"
+    },
+    {
+        "name":  "麻痺",
+        "codes":  [
+                      "1-10"
+                  ],
+        "lyric":  "忽然發現自己什麼都沒有 在清醒之後",
+        "nameEn":  "Paralyze",
+        "section":  "01.Let's Go!",
+        "sectionEn":  "Let's Go!"
+    },
+    {
+        "name":  "我們的墮落",
+        "codes":  [
+                      "1-11",
+                      "fall"
+                  ],
+        "lyric":  "你敢有聽到阮的心聲",
+        "nameEn":  "Our Fall",
+        "section":  "01.Let's Go!",
+        "sectionEn":  "Let's Go!"
+    },
+    {
+        "name":  "十九",
+        "codes":  [
+                      "1-12"
+                  ],
+        "lyric":  "猜測在我心中打了個結",
+        "nameEn":  "19",
+        "section":  "01.Let's Go!",
+        "sectionEn":  "Let's Go!"
+    },
+    {
+        "name":  "光明的路",
+        "codes":  [
+                      "1-13"
+                  ],
+        "lyric":  "冬天的風吹來冷冷的雨",
+        "nameEn":  "The Road to Brightness",
+        "section":  "01.Let's Go!",
+        "sectionEn":  "Let's Go!"
+    },
+    {
+        "name":  "我在哪裡",
+        "codes":  [
+                      "1-14"
+                  ],
+        "lyric":  "毋知家己佇佗位",
+        "nameEn":  "Where Am I",
+        "section":  "01.Let's Go!",
+        "sectionEn":  "Let's Go!"
+    },
+    {
+        "name":  "惡夢9125",
+        "codes":  [
+                      "2-1"
+                  ],
+        "lyric":  "對惡夢之中驚醒",
+        "nameEn":  "Nightmare 9125",
+        "section":  "02.海上的人",
+        "sectionEn":  "Standing Here"
+    },
+    {
+        "name":  "日子",
+        "codes":  [
+                      "2-2"
+                  ],
+        "lyric":  "光線飄佇空中 照映著你的悲傷",
+        "nameEn":  "Days",
+        "section":  "02.海上的人",
+        "sectionEn":  "Standing Here"
+    },
+    {
+        "name":  "自由路",
+        "codes":  [
+                      "2-3",
+                      "freedom"
+                  ],
+        "lyric":  "真理佇佗位 是非佇佗位",
+        "nameEn":  "Freedom",
+        "section":  "02.海上的人",
+        "sectionEn":  "Standing Here"
+    },
+    {
+        "name":  "舊照片",
+        "codes":  [
+                      "2-4"
+                  ],
+        "lyric":  "相片內 你的面 寫著滿滿的志氣",
+        "nameEn":  "Old Picture",
+        "section":  "02.海上的人",
+        "sectionEn":  "Standing Here"
+    },
+    {
+        "name":  "晚安台灣",
+        "codes":  [
+                      "2-5"
+                  ],
+        "lyric":  "佇這个安靜的暗暝",
+        "nameEn":  "Good Night! Formosa!",
+        "section":  "02.海上的人",
+        "sectionEn":  "Standing Here"
+    },
+    {
+        "name":  "黃昏公路",
+        "codes":  [
+                      "2-6"
+                  ],
+        "lyric":  "黃昏公路吹著風",
+        "nameEn":  "Dusk Freeway",
+        "section":  "02.海上的人",
+        "sectionEn":  "Standing Here"
+    },
+    {
+        "name":  "夏天結束以前",
+        "codes":  [
+                      "2-7"
+                  ],
+        "lyric":  "我緊握著手 冷汗直流",
+        "nameEn":  "Before the End of Summer",
+        "section":  "02.海上的人",
+        "sectionEn":  "Standing Here"
+    },
+    {
+        "name":  "你家爆炸我沒有哭",
+        "codes":  [
+                      "2-8",
+                      "boom"
+                  ],
+        "lyric":  "憂頭結面 印堂發烏 為何遮失志",
+        "nameEn":  "I Didn't Cry While Your House Boom!!",
+        "section":  "02.海上的人",
+        "sectionEn":  "Standing Here"
+    },
+    {
+        "name":  "朋友歌",
+        "codes":  [
+                      "2-9",
+                      "friend"
+                  ],
+        "lyric":  "老朋友 這是寫予你的歌",
+        "nameEn":  "Friend Song",
+        "section":  "02.海上的人",
+        "sectionEn":  "Standing Here"
+    },
+    {
+        "name":  "船長",
+        "codes":  [
+                      "2-10"
+                  ],
+        "lyric":  "",
+        "nameEn":  "Captain",
+        "section":  "02.海上的人",
+        "sectionEn":  "Standing Here"
+    },
+    {
+        "name":  "海上的人",
+        "codes":  [
+                      "2-11"
+                  ],
+        "lyric":  "越頭看彼段青春的路程",
+        "nameEn":  "A Man on the Sea",
+        "section":  "02.海上的人",
+        "sectionEn":  "Standing Here"
+    },
+    {
+        "name":  "站在這裡",
+        "codes":  [
+                      "2-12"
+                  ],
+        "lyric":  "徛佇遮 冬天的海岸",
+        "nameEn":  "Standing Here",
+        "section":  "02.海上的人",
+        "sectionEn":  "Standing Here"
+    },
+    {
+        "name":  "再會！青春",
+        "codes":  [
+                      "3-1"
+                  ],
+        "lyric":  "",
+        "nameEn":  "Goodbye You!th",
+        "section":  "03.再會！青春",
+        "sectionEn":  "Goodbye You!th"
+    },
+    {
+        "name":  "欲走無路",
+        "codes":  [
+                      "3-2"
+                  ],
+        "lyric":  "捾著行李 毋情毋願 坐上彼幫車",
+        "nameEn":  "Going Nowhere",
+        "section":  "03.再會！青春",
+        "sectionEn":  "Goodbye You!th"
+    },
+    {
+        "name":  "天鳥",
+        "codes":  [
+                      "3-3",
+                      "freebird",
+                      "bird"
+                  ],
+        "lyric":  "春夏秋冬我已經無感覺",
+        "nameEn":  "Free Bird",
+        "section":  "03.再會！青春",
+        "sectionEn":  "Goodbye You!th"
+    },
+    {
+        "name":  "新歌三號",
+        "codes":  [
+                      "3-4",
+                      "n3"
+                  ],
+        "lyric":  "沸騰的自己消失在漩渦裡",
+        "nameEn":  "New Song No.3",
+        "section":  "03.再會！青春",
+        "sectionEn":  "Goodbye You!th"
+    },
+    {
+        "name":  "同學會",
+        "codes":  [
+                      "3-5",
+                      "classmate",
+                      "class"
+                  ],
+        "lyric":  "離開戰爭般的生活",
+        "nameEn":  "After These Years",
+        "section":  "03.再會！青春",
+        "sectionEn":  "Goodbye You!th"
+    },
+    {
+        "name":  "無力者哀歌",
+        "codes":  [
+                      "3-6",
+                      "fuck"
+                  ],
+        "lyric":  "敢有聽著怪手的聲 彼是咧拆咱的厝",
+        "nameEn":  "Shattered Dreams",
+        "section":  "03.再會！青春",
+        "sectionEn":  "Goodbye You!th"
+    },
+    {
+        "name":  "頂樓天光",
+        "codes":  [
+                      "3-7"
+                  ],
+        "lyric":  "踮在五坪的房間",
+        "nameEn":  "Sunrise On The Rooftop",
+        "section":  "03.再會！青春",
+        "sectionEn":  "Goodbye You!th"
+    },
+    {
+        "name":  "心內話",
+        "codes":  [
+                      "3-8"
+                  ],
+        "lyric":  "熟似的聲 問我食飽未",
+        "nameEn":  "Bottom Of My Heart",
+        "section":  "03.再會！青春",
+        "sectionEn":  "Goodbye You!th"
+    },
+    {
+        "name":  "憂愁戀歌",
+        "codes":  [
+                      "3-9"
+                  ],
+        "lyric":  "你敢知相思 是啥滋味",
+        "nameEn":  "Supernova Lover",
+        "section":  "03.再會！青春",
+        "sectionEn":  "Goodbye You!th"
+    },
+    {
+        "name":  "崩潰世代",
+        "codes":  [
+                      "3-10"
+                  ],
+        "lyric":  "希望我有個淫蕩的朋友",
+        "nameEn":  "Broken Generation",
+        "section":  "03.再會！青春",
+        "sectionEn":  "Goodbye You!th"
+    },
+    {
+        "name":  "我的廢人朋友",
+        "codes":  [
+                      "3-11"
+                  ],
+        "lyric":  "半暝三更睏袂去 無聊的暗暝",
+        "nameEn":  "Good For Nothing",
+        "section":  "03.再會！青春",
+        "sectionEn":  "Goodbye You!th"
+    },
+    {
+        "name":  "基隆路",
+        "codes":  [
+                      "4-1",
+                      "klr"
+                  ],
+        "lyric":  "為著啥物四界走傱 為著啥物失去理想",
+        "nameEn":  "Keelung Road",
+        "section":  "04.REBORN",
+        "sectionEn":  "REBORN"
+    },
+    {
+        "name":  "最後兩禮拜",
+        "codes":  [
+                      "4-2",
+                      "week",
+                      "2w"
+                  ],
+        "lyric":  "你感覺無趣味 所以我失去你的愛",
+        "nameEn":  "Last Two Weeks",
+        "section":  "04.REBORN",
+        "sectionEn":  "REBORN"
+    },
+    {
+        "name":  "Don't You Fight",
+        "codes":  [
+                      "4-3",
+                      "dyf"
+                  ],
+        "lyric":  "The story's been left behind",
+        "nameEn":  "Don't You Fight",
+        "section":  "04.REBORN",
+        "sectionEn":  "REBORN"
+    },
+    {
+        "name":  "十字路口",
+        "codes":  [
+                      "4-4"
+                  ],
+        "lyric":  "生活佇一个無聲的世界",
+        "nameEn":  "Crossroad",
+        "section":  "04.REBORN",
+        "sectionEn":  "REBORN"
+    },
+    {
+        "name":  "台11",
+        "codes":  [
+                      "4-5",
+                      "11"
+                  ],
+        "lyric":  "一个人開著車 駛向東海岸",
+        "nameEn":  "Highway 11",
+        "section":  "04.REBORN",
+        "sectionEn":  "REBORN"
+    },
+    {
+        "name":  "南國的風",
+        "codes":  [
+                      "4-6"
+                  ],
+        "lyric":  "又閣咧落雨 已經落規下晡",
+        "nameEn":  "Southern Wind",
+        "section":  "04.REBORN",
+        "sectionEn":  "REBORN"
+    },
+    {
+        "name":  "新歌四號",
+        "codes":  [
+                      "4-7",
+                      "n4"
+                  ],
+        "lyric":  "夭壽 你夭壽可愛 我歹勢予人知",
+        "nameEn":  "You Give Love a Good Name",
+        "section":  "04.REBORN",
+        "sectionEn":  "REBORN"
+    },
+    {
+        "name":  "今天喝酒了",
+        "codes":  [
+                      "4-8",
+                      "drink"
+                  ],
+        "lyric":  "今天喝酒了 昨天也有喝",
+        "nameEn":  "Beer in da House",
+        "section":  "04.REBORN",
+        "sectionEn":  "REBORN"
+    },
+    {
+        "name":  "繼續向前行",
+        "codes":  [
+                      "4-9"
+                  ],
+        "lyric":  "鉸掉頭鬃 面對新的一工",
+        "nameEn":  "Keep on Going",
+        "section":  "04.REBORN",
+        "sectionEn":  "REBORN"
+    },
+    {
+        "name":  "石垣好朋友",
+        "codes":  [
+                      "4-10"
+                  ],
+        "lyric":  "再會啦我的朋友 佇分開這个下晡",
+        "nameEn":  "Re:Hello",
+        "section":  "04.REBORN",
+        "sectionEn":  "REBORN"
+    },
+    {
+        "name":  "最後一個",
+        "codes":  [
+                      "4-11"
+                  ],
+        "lyric":  "等風吹落地 等日頭落山",
+        "nameEn":  "To Her",
+        "section":  "04.REBORN",
+        "sectionEn":  "REBORN"
+    },
+    {
+        "name":  "早安台灣",
+        "codes":  [
+                      "4-12",
+                      "nd"
+                  ],
+        "lyric":  "早起五點外 開門的早頓店",
+        "nameEn":  "A New Day",
+        "section":  "04.REBORN",
+        "sectionEn":  "REBORN"
+    },
+    {
+        "name":  "無名英雄",
+        "codes":  [
+                      "w1"
+                  ],
+        "lyric":  "趕走所有無路用的悲傷",
+        "nameEn":  "Stand Up Like A Taiwanese",
+        "section":  "05.無名英雄",
+        "sectionEn":  "Stand Up Like A Taiwanese"
+    },
+    {
+        "name":  "生活革命",
+        "codes":  [
+                      "w2"
+                  ],
+        "lyric":  "最近我感覺規个人訕訕",
+        "nameEn":  "Revolutionize The Disgusting Life",
+        "section":  "05.無名英雄",
+        "sectionEn":  "Stand Up Like A Taiwanese"
+    },
+    {
+        "name":  "雙城記",
+        "codes":  [
+                      "w3",
+                      "hk"
+                  ],
+        "lyric":  "無辜的人 昨天已犯了明天的罪",
+        "nameEn":  "City Of Sadness",
+        "section":  "05.無名英雄",
+        "sectionEn":  "Stand Up Like A Taiwanese"
+    },
+    {
+        "name":  "一九四五",
+        "codes":  [
+                      "w4",
+                      "1945"
+                  ],
+        "lyric":  "月 暗淡的光線 照著僥倖的人",
+        "nameEn":  "1945",
+        "section":  "05.無名英雄",
+        "sectionEn":  "Stand Up Like A Taiwanese"
+    },
+    {
+        "name":  "百年追求",
+        "codes":  [
+                      "w5",
+                      "100y",
+                      "w100"
+                  ],
+        "lyric":  "布條 傳單 宣傳車 欲上街頭的綴我行",
+        "nameEn":  "Cycle Of Freedom Soul",
+        "section":  "05.無名英雄",
+        "sectionEn":  "Stand Up Like A Taiwanese"
+    },
+    {
+        "name":  "少年家",
+        "codes":  [
+                      "w6",
+                      "young"
+                  ],
+        "lyric":  "嘿 少年家 你欲行去佗",
+        "nameEn":  "Juvenile",
+        "section":  "05.無名英雄",
+        "sectionEn":  "Stand Up Like A Taiwanese"
+    },
+    {
+        "name":  "海島冒險王",
+        "codes":  [
+                      "w7",
+                      "k2"
+                  ],
+        "lyric":  "這是渺小的一天 也是偉大的一天",
+        "nameEn":  "K2, We Too",
+        "section":  "05.無名英雄",
+        "sectionEn":  "Stand Up Like A Taiwanese"
+    },
+    {
+        "name":  "新歌五號",
+        "codes":  [
+                      "w8",
+                      "n5"
+                  ],
+        "lyric":  "Oh California So we meet again",
+        "nameEn":  "California Dream",
+        "section":  "05.無名英雄",
+        "sectionEn":  "Stand Up Like A Taiwanese"
+    },
+    {
+        "name":  "十二月的妳",
+        "codes":  [
+                      "w9",
+                      "dec",
+                      "12y"
+                  ],
+        "lyric":  "又閣來到你的城市",
+        "nameEn":  "A One And A Two",
+        "section":  "05.無名英雄",
+        "sectionEn":  "Stand Up Like A Taiwanese"
+    },
+    {
+        "name":  "航向遠方的船",
+        "codes":  [
+                      "w10"
+                  ],
+        "lyric":  "你說自由就像一陣風",
+        "nameEn":  "Liberal Sailboat",
+        "section":  "05.無名英雄",
+        "sectionEn":  "Stand Up Like A Taiwanese"
+    },
+    {
+        "name":  "The Light",
+        "codes":  [
+                      "light"
+                  ],
+        "lyric":  "揺れる向日葵 君の手を確かめた",
+        "nameEn":  "The Light feat. Masafumi Gotoh",
+        "section":  "05.無名英雄",
+        "sectionEn":  "Stand Up Like A Taiwanese"
+    },
+    {
+        "name":  "人間條件",
+        "codes":  [
+                      "j1"
+                  ],
+        "lyric":  "歡迎來到這个世界 爸爸是一个音樂家",
+        "nameEn":  "Human Condition",
+        "section":  "06.家和萬事興",
+        "sectionEn":  "Human Condition"
+    },
+    {
+        "name":  "新歌六號",
+        "codes":  [
+                      "j2",
+                      "n6"
+                  ],
+        "lyric":  "1999 八月二十三",
+        "nameEn":  "My Favorite Guitar",
+        "section":  "06.家和萬事興",
+        "sectionEn":  "Human Condition"
+    },
+    {
+        "name":  "火山戀曲",
+        "codes":  [
+                      "j3",
+                      "fire"
+                  ],
+        "lyric":  "啥人將我修理好勢 規个生活攏為你戇戇踅",
+        "nameEn":  "Volcano Lover",
+        "section":  "06.家和萬事興",
+        "sectionEn":  "Human Condition"
+    },
+    {
+        "name":  "一百夜",
+        "codes":  [
+                      "j4",
+                      "100n"
+                  ],
+        "lyric":  "我應該離開 這个無你的城市",
+        "nameEn":  "Hundred Nights",
+        "section":  "06.家和萬事興",
+        "sectionEn":  "Human Condition"
+    },
+    {
+        "name":  "新世界的光",
+        "codes":  [
+                      "j5"
+                  ],
+        "lyric":  "轉大人 是告別一段混沌青春",
+        "nameEn":  "Light of the New World (feat. DJ Mykal)",
+        "section":  "06.家和萬事興",
+        "sectionEn":  "Human Condition"
+    },
+    {
+        "name":  "來坐",
+        "codes":  [
+                      "j6"
+                  ],
+        "lyric":  "來喔來喔入來坐 免客氣免歹勢",
+        "nameEn":  "Sit Down Please",
+        "section":  "06.家和萬事興",
+        "sectionEn":  "Human Condition"
+    },
+    {
+        "name":  "最後一個",
+        "codes":  [
+                      "j7",
+                      "last"
+                  ],
+        "lyric":  "等風吹落地 等日頭落山",
+        "nameEn":  "The Last One",
+        "section":  "06.家和萬事興",
+        "sectionEn":  "Human Condition"
+    },
+    {
+        "name":  "給女兒",
+        "codes":  [
+                      "j8",
+                      "girl"
+                  ],
+        "lyric":  "我的查某囝 穿著新娘衫",
+        "nameEn":  "Her Wedding",
+        "section":  "06.家和萬事興",
+        "sectionEn":  "Human Condition"
+    },
+    {
+        "name":  "家和萬事興",
+        "codes":  [
+                      "j9",
+                      "home",
+                      "家和"
+                  ],
+        "lyric":  "房間內黃色電火是唯一的光",
+        "nameEn":  "Solo Dance at Midnight",
+        "section":  "06.家和萬事興",
+        "sectionEn":  "Human Condition"
+    },
+    {
+        "name":  "人生尾路",
+        "codes":  [
+                      "j10",
+                      "die"
+                  ],
+        "lyric":  "原諒我先行一步 相信咱會閣相逢",
+        "nameEn":  "Funeral Monologue",
+        "section":  "06.家和萬事興",
+        "sectionEn":  "Human Condition"
+    },
+    {
+        "name":  "Song For You",
+        "codes":  [
+                      "SFY"
+                  ],
+        "lyric":  "Look at the sun shining so hard",
+        "nameEn":  "Song for You",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "Let’s Go",
+        "codes":  [
+                      "let",
+                      "go"
+                  ],
+        "lyric":  "生長在這個悲哀的時代",
+        "nameEn":  "Let's Go",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "Passaway",
+        "codes":  [
+                      "pass",
+                      "away"
+                  ],
+        "lyric":  "懷念過去",
+        "nameEn":  "Passaway",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "惡夢9125",
+        "codes":  [
+                      "9125"
+                  ],
+        "lyric":  "對惡夢之中驚醒",
+        "nameEn":  "Nightmare 9125",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "日子",
+        "codes":  [
+                      "days"
+                  ],
+        "lyric":  "光線飄佇空中 照映著你的悲傷",
+        "nameEn":  "Days",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "舊照片",
+        "codes":  [
+                      "OP"
+                  ],
+        "lyric":  "相片內 你的面 寫了滿滿的志氣",
+        "nameEn":  "Old Picture",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "夏天結束以前",
+        "codes":  [
+                      "summer"
+                  ],
+        "lyric":  "我緊握著手 冷汗直流",
+        "nameEn":  "Before the End of Summer",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "南國的風",
+        "codes":  [
+                      "south",
+                      "wind"
+                  ],
+        "lyric":  "又閣咧落雨 已經落規下晡",
+        "nameEn":  "Southern Wind",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "黃昏公路",
+        "codes":  [
+                      "sunset"
+                  ],
+        "lyric":  "黃昏公路吹著風",
+        "nameEn":  "Dusk Freeway",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "海上的人",
+        "codes":  [
+                      "amots",
+                      "sea"
+                  ],
+        "lyric":  "越頭看彼段青春的路程",
+        "nameEn":  "A Man on the Sea",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "晚安台灣",
+        "codes":  [
+                      "gntw",
+                      "gn"
+                  ],
+        "lyric":  "佇這个安靜的暗暝",
+        "nameEn":  "Good Night! Formosa!",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "島嶼天光",
+        "codes":  [
+                      "318"
+                  ],
+        "lyric":  "親愛的媽媽 請你毋通煩惱我",
+        "nameEn":  "Island's Sunrise",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "我在哪裡",
+        "codes":  [
+                      "where"
+                  ],
+        "lyric":  "毋知家己佇佗位 行入橋跤迷魂陣",
+        "nameEn":  "Where Am I",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "欲走無路",
+        "codes":  [
+                      "run"
+                  ],
+        "lyric":  "捾咧行李 毋情毋願 坐上彼班車",
+        "nameEn":  "Going Nowhere",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "憂愁戀歌",
+        "codes":  [
+                      "super"
+                  ],
+        "lyric":  "你敢知相思 是啥滋味",
+        "nameEn":  "Supernova Lover",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "頂樓天光",
+        "codes":  [
+                      "頂樓"
+                  ],
+        "lyric":  "踮在五坪的房間 異鄉的過客",
+        "nameEn":  "Sunrise On The Rooftop",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "十九",
+        "codes":  [
+                      "19"
+                  ],
+        "lyric":  "猜測在我心中打了個結",
+        "nameEn":  "19",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "人生",
+        "codes":  [
+                      "life"
+                  ],
+        "lyric":  "一張白紙 踮在這个彩色世界 變成你佮我",
+        "nameEn":  "Life",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "站在這裡",
+        "codes":  [
+                      "stand"
+                  ],
+        "lyric":  "徛佇遮 冬天的海岸",
+        "nameEn":  "Standing Here",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "長途夜車",
+        "codes":  [
+                      "bus"
+                  ],
+        "lyric":  "時間是三點半",
+        "nameEn":  "Southbound Night Bus",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "繼續向前行",
+        "codes":  [
+                      "kog"
+                  ],
+        "lyric":  "鉸掉頭鬃 面對新的一工",
+        "nameEn":  "Keep on Going",
+        "section":  "00.進擊下半場",
+        "sectionEn":  "Begin The Second Half"
+    },
+    {
+        "name":  "Back to the world",
+        "codes":  [
+                      "back"
+                  ],
+        "lyric":  "Dear my friend 你為何沉默",
+        "nameEn":  "Back to the world",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "Super Monkeys",
+        "codes":  [
+                      "Monkey"
+                  ],
+        "lyric":  "若是欲和人輸贏的時 愛提出一定贏的殺氣",
+        "nameEn":  "Super Monkeys",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "曾經瘋狂",
+        "codes":  [
+                      "曾經"
+                  ],
+        "lyric":  "曾經瘋狂 你專注的模樣",
+        "nameEn":  "Chen 52",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "永遠不回頭 - 小宇宙燃燒版",
+        "codes":  [
+                      "永遠不回頭"
+                  ],
+        "lyric":  "在天色破曉之前 我想要爬上山顛",
+        "nameEn":  "Never Look Back in Anger",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "桃猿戰士",
+        "codes":  [
+                      "桃猿"
+                  ],
+        "lyric":  "讓我們全副武裝 重返榮耀戰場",
+        "nameEn":  "Lamigo Fighter",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "更遠的前方",
+        "codes":  [
+                      "更遠"
+                  ],
+        "lyric":  "嘿 你知道嗎 我一直相信著",
+        "nameEn":  "",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "兼愛非攻",
+        "codes":  [
+                      "兼愛"
+                  ],
+        "lyric":  "",
+        "nameEn":  "",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "永遠的 Lamigo",
+        "codes":  [
+                      "Lamigo"
+                  ],
+        "lyric":  "喔 我們是永遠的Lamigo",
+        "nameEn":  "",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "自信勇敢咱的名",
+        "codes":  [
+                      "自信勇敢"
+                  ],
+        "lyric":  "用恁送我的萬年筆 將心內的話寫佇批紙",
+        "nameEn":  "",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "戰勝是唯一的路",
+        "codes":  [
+                      "戰勝"
+                  ],
+        "lyric":  "想撐起一片天 練習著一遍又一遍",
+        "nameEn":  "",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "希望的明日",
+        "codes":  [
+                      "希望"
+                  ],
+        "lyric":  "沒能實現每年都要見面的願望",
+        "nameEn":  "",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "一起更強",
+        "codes":  [
+
+                  ],
+        "lyric":  "When we fight together We will be stronger",
+        "nameEn":  "",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "本性倔強",
+        "codes":  [
+
+                  ],
+        "lyric":  "往事就予伊隨風 放下過去行新的道路",
+        "nameEn":  "",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "高雄驛起飛",
+        "codes":  [
+                      "高雄"
+                  ],
+        "lyric":  "閣一幫火車 漸漸欲起行",
+        "nameEn":  "",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "好膽來技較",
+        "codes":  [
+
+                  ],
+        "lyric":  "心中那一份執著 帶領著我往前走",
+        "nameEn":  "",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "來坐",
+        "codes":  [
+
+                  ],
+        "lyric":  "來喔來喔入來坐 免客氣免歹勢",
+        "nameEn":  "Sit Down Please",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "RISE UP",
+        "codes":  [
+
+                  ],
+        "lyric":  "Rise up again 讓榮耀重現 We are the best oh Rakuten",
+        "nameEn":  "RISE UP",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "時鐘霆矣",
+        "codes":  [
+
+                  ],
+        "lyric":  "天猶未光 猶有時間決定",
+        "nameEn":  "",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "超級英雄",
+        "codes":  [
+
+                  ],
+        "lyric":  "任務開始之前 有些事你要知道",
+        "nameEn":  "Antibiotic",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "Pay Money to Wonderland",
+        "codes":  [
+                      "fireball"
+                  ],
+        "lyric":  "You pay me money I make you happy",
+        "nameEn":  "Pay Money to Wonderland",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "最重要的事",
+        "codes":  [
+                      "最重要"
+                  ],
+        "lyric":  "我們不會忘記那些日子更不想要再經歷一次",
+        "nameEn":  "The Most Important Thing",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "公賣局的酒香",
+        "codes":  [
+                      "公賣局"
+                  ],
+        "lyric":  "溫柔的風輕輕吹過百年的酒廠",
+        "nameEn":  "",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "今天的我",
+        "codes":  [
+                      "今天",
+                      "冠軍"
+                  ],
+        "lyric":  "今天的我 會超越你想像的極限",
+        "nameEn":  "The Day We Rise",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "牽亡歌，再陪你多走一段",
+        "codes":  [
+                      "牽亡"
+                  ],
+        "lyric":  "謹請本壇諸猛將不捨慈悲降落壇",
+        "nameEn":  "",
+        "section":  "00.單曲",
+        "sectionEn":  "Singles"
+    },
+    {
+        "name":  "残像モーション feat.磯部正文",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "",
+        "section":  "04.REBORN(JP)",
+        "sectionEn":  "REBORN (Japan Edition)"
+    },
+    {
+        "name":  "Keelung Road",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Keelung Road",
+        "section":  "04.REBORN(JP)",
+        "sectionEn":  "REBORN (Japan Edition)"
+    },
+    {
+        "name":  "Last Two Weeks",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Last Two Weeks",
+        "section":  "04.REBORN(JP)",
+        "sectionEn":  "REBORN (Japan Edition)"
+    },
+    {
+        "name":  "Don't You Fight feat. 細美武士",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Don't You Fight",
+        "section":  "04.REBORN(JP)",
+        "sectionEn":  "REBORN (Japan Edition)"
+    },
+    {
+        "name":  "おやすみ台湾 晚安台灣 日本語Ver.",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Good Night! Formosa! (Japanese Ver.)",
+        "section":  "04.REBORN(JP)",
+        "sectionEn":  "REBORN (Japan Edition)"
+    },
+    {
+        "name":  "Crossroad",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Crossroad",
+        "section":  "04.REBORN(JP)",
+        "sectionEn":  "REBORN (Japan Edition)"
+    },
+    {
+        "name":  "Southern Wind",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Southern Wind",
+        "section":  "04.REBORN(JP)",
+        "sectionEn":  "REBORN (Japan Edition)"
+    },
+    {
+        "name":  "You Give Love a Good Name",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "You Give Love a Good Name",
+        "section":  "04.REBORN(JP)",
+        "sectionEn":  "REBORN (Japan Edition)"
+    },
+    {
+        "name":  "Highway 11",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Highway 11",
+        "section":  "04.REBORN(JP)",
+        "sectionEn":  "REBORN (Japan Edition)"
+    },
+    {
+        "name":  "Keep on Going",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Keep on Going",
+        "section":  "04.REBORN(JP)",
+        "sectionEn":  "REBORN (Japan Edition)"
+    },
+    {
+        "name":  "Re:Hellow",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Re:Hellow",
+        "section":  "04.REBORN(JP)",
+        "sectionEn":  "REBORN (Japan Edition)"
+    },
+    {
+        "name":  "To Her",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "To Her",
+        "section":  "04.REBORN(JP)",
+        "sectionEn":  "REBORN (Japan Edition)"
+    },
+    {
+        "name":  "A New Day",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "A New Day",
+        "section":  "04.REBORN(JP)",
+        "sectionEn":  "REBORN (Japan Edition)"
+    },
+    {
+        "name":  "この島の夜明け 島嶼天光 日本語Ver.",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Island's Sunrise (Japanese Ver.)",
+        "section":  "04.REBORN(JP)",
+        "sectionEn":  "REBORN (Japan Edition)"
+    },
+    {
+        "name":  "The Light feat.後藤 正文",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "The Light feat. Masafumi Gotoh",
+        "section":  "05.Unsung Heroes",
+        "sectionEn":  "Unsung Heroes (Japan Edition)"
+    },
+    {
+        "name":  "無名英雄",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Stand up Like a Taiwanese",
+        "section":  "05.Unsung Heroes",
+        "sectionEn":  "Unsung Heroes (Japan Edition)"
+    },
+    {
+        "name":  "生活革命",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Revolutionize the Disgusting Life",
+        "section":  "05.Unsung Heroes",
+        "sectionEn":  "Unsung Heroes (Japan Edition)"
+    },
+    {
+        "name":  "雙城記",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "City of Sadness",
+        "section":  "05.Unsung Heroes",
+        "sectionEn":  "Unsung Heroes (Japan Edition)"
+    },
+    {
+        "name":  "一九四五",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "1945",
+        "section":  "05.Unsung Heroes",
+        "sectionEn":  "Unsung Heroes (Japan Edition)"
+    },
+    {
+        "name":  "百年追求",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Cycle of Freedom Soul",
+        "section":  "05.Unsung Heroes",
+        "sectionEn":  "Unsung Heroes (Japan Edition)"
+    },
+    {
+        "name":  "少年家",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Juvenile",
+        "section":  "05.Unsung Heroes",
+        "sectionEn":  "Unsung Heroes (Japan Edition)"
+    },
+    {
+        "name":  "海の風 feat.磯部 正文 (海上的人 日本語 Ver.)",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "The Man on the Sea feat. Masafumi Isobe (Japanese Ver.)",
+        "section":  "05.Unsung Heroes",
+        "sectionEn":  "Unsung Heroes (Japan Edition)"
+    },
+    {
+        "name":  "海島冒險王",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "K2, We Too",
+        "section":  "05.Unsung Heroes",
+        "sectionEn":  "Unsung Heroes (Japan Edition)"
+    },
+    {
+        "name":  "新歌五號",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "California Dream",
+        "section":  "05.Unsung Heroes",
+        "sectionEn":  "Unsung Heroes (Japan Edition)"
+    },
+    {
+        "name":  "12月の君へ (十二月的妳 日本語 Ver.)",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "A One and a Two (Japanese Ver.)",
+        "section":  "05.Unsung Heroes",
+        "sectionEn":  "Unsung Heroes (Japan Edition)"
+    },
+    {
+        "name":  "航向遠方的船",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Liberal Sailboat",
+        "section":  "05.Unsung Heroes",
+        "sectionEn":  "Unsung Heroes (Japan Edition)"
+    },
+    {
+        "name":  "夜行バス (長途夜車 日本語 Ver.)",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Southbound Night Bus (Japanese Ver.)",
+        "section":  "05.Unsung Heroes",
+        "sectionEn":  "Unsung Heroes (Japan Edition)"
+    },
+    {
+        "name":  "Keep On Going (繼續向前行 日本語 Ver.)",
+        "codes":  [
+
+                  ],
+        "lyric":  "",
+        "nameEn":  "Keep on Going (Japanese Ver.)",
+        "section":  "05.Unsung Heroes",
+        "sectionEn":  "Unsung Heroes (Japan Edition)"
+    }
 ]
