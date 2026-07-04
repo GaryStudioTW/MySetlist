@@ -410,7 +410,15 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   overflow: hidden;
 }
 
-.project-card-actions {
+.project-card-actions-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  display: flex;
+}
+
+.project-card-actions-right {
   position: absolute;
   top: 0;
   right: 0;
@@ -419,7 +427,7 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 }
 
 .pca-btn {
-  width: 64px;
+  width: 72px;
   height: 100%;
   border: none;
   color: #fff;

@@ -141,7 +141,7 @@ const ICONS = {
   grip: `<svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="9" cy="18" r="1.2"/><circle cx="15" cy="6" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="15" cy="18" r="1.2"/></svg>`,
   spotifyDot: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="color:var(--spotify); width:0.6em; height:0.6em; vertical-align:0;"><circle cx="12" cy="12" r="12"/></svg>`,
   edit: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`,
-  pin: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-11a7 7 0 0 0-14 0c0 4.5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>`,
+  pin: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><g transform="rotate(25 12 12)"><path d="M16,9V4h1c0.55,0,1-0.45,1-1s-0.45-1-1-1H7C6.45,2,6,2.45,6,3s0.45,1,1,1h1v5c0,1.66-1.34,3-3,3v2h5.97v7l1,1l1-1v-7H19v-2C17.34,12,16,10.66,16,9z"/></g></svg>`,
   copy: `<svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
 };
 
@@ -316,8 +316,11 @@ function renderLogin() {
 // 畫面：首頁（演出專案列表）
 // ----------------------------------------------------------------------------
 
-const SWIPE_ACTIONS_WIDTH = 192; // 三個操作按鈕（各 64px）的總寬度
+const PIN_ACTION_WIDTH = 72; // 右滑露出的置頂按鈕寬度
+const DELETE_ACTIONS_WIDTH = 144; // 左滑露出的複製＋刪除按鈕總寬度
+const SWIPE_COMMIT_RATIO = 1.5; // 滑動超過按鈕寬度的這個倍數，視為「滑到底」直接觸發動作
 let openSwipeCard = null;
+let openSwipeDirection = null; // "left" 或 "right"，記錄目前展開的卡片是哪一側
 
 function getHomeSortComparator(mode) {
   const dateVal = (p) => p.date || "";
@@ -346,6 +349,7 @@ function sortProjectsForHome(projects) {
 function renderHome() {
   const user = state.user;
   openSwipeCard = null;
+  openSwipeDirection = null;
 
   const sortedProjects = sortProjectsForHome(state.projects);
 
@@ -361,10 +365,12 @@ function renderHome() {
             : `<span class="badge badge-success">已同步</span>`;
           return h`
             <div class="project-card-wrap" data-id="${p.id}">
-              <div class="project-card-actions">
+              <div class="project-card-actions-left">
                 <button type="button" class="pca-btn pca-pin" data-action="pin" data-id="${p.id}">
                   ${ICONS.pin}${p.pinned ? "取消置頂" : "置頂"}
                 </button>
+              </div>
+              <div class="project-card-actions-right">
                 <button type="button" class="pca-btn pca-copy" data-action="copy" data-id="${p.id}">
                   ${ICONS.copy}複製
                 </button>
@@ -486,17 +492,23 @@ function closeSwipeCard(card) {
   card.style.transform = "";
 }
 
-// 卡片左滑顯示操作按鈕：偵測到明顯的水平拖曳才攔截，垂直方向的手勢一律放行
-// 給頁面捲動；輕點（未觸發滑動判定）則視為一般點擊進入詳情頁
+// 卡片雙向滑動：右滑露出置頂（滑到底直接切換置頂狀態），左滑露出複製／刪除
+// （滑到底直接跳出刪除確認）。只偵測到明顯的水平拖曳才攔截，垂直方向的手勢
+// 一律放行給頁面捲動；輕點（未觸發滑動判定）則視為一般點擊進入詳情頁
 function attachSwipeHandlers(wrap) {
   const card = wrap.querySelector(".project-card");
   let ctx = null;
+
+  function currentOpenOffset() {
+    if (openSwipeCard !== card) return 0;
+    return openSwipeDirection === "right" ? PIN_ACTION_WIDTH : -DELETE_ACTIONS_WIDTH;
+  }
 
   card.addEventListener("pointerdown", (e) => {
     ctx = {
       startX: e.clientX,
       startY: e.clientY,
-      startOffset: openSwipeCard === card ? -SWIPE_ACTIONS_WIDTH : 0,
+      startOffset: currentOpenOffset(),
       decided: false,
       isSwipe: false,
     };
@@ -517,7 +529,9 @@ function attachSwipeHandlers(wrap) {
       }
     }
     if (ctx.decided && ctx.isSwipe) {
-      const offset = Math.min(0, Math.max(-SWIPE_ACTIONS_WIDTH, ctx.startOffset + dx));
+      const maxRight = PIN_ACTION_WIDTH * SWIPE_COMMIT_RATIO;
+      const maxLeft = -DELETE_ACTIONS_WIDTH * SWIPE_COMMIT_RATIO;
+      const offset = Math.min(maxRight, Math.max(maxLeft, ctx.startOffset + dx));
       card.style.transform = `translateX(${offset}px)`;
     }
   });
@@ -527,21 +541,46 @@ function attachSwipeHandlers(wrap) {
     if (ctx.decided && ctx.isSwipe) {
       const dx = e.clientX - ctx.startX;
       const finalOffset = ctx.startOffset + dx;
-      const shouldOpen = finalOffset < -SWIPE_ACTIONS_WIDTH / 2;
+      const project = state.projects.find((p) => p.id === wrap.dataset.id);
       card.style.transition = "transform 0.2s ease";
-      card.style.transform = shouldOpen ? `translateX(-${SWIPE_ACTIONS_WIDTH}px)` : "";
-      if (shouldOpen) {
+
+      if (finalOffset > PIN_ACTION_WIDTH * SWIPE_COMMIT_RATIO * 0.9) {
+        // 右滑到底：直接切換置頂狀態
+        card.style.transform = "";
+        openSwipeCard = null;
+        openSwipeDirection = null;
+        if (project) toggleProjectPinned(project);
+      } else if (finalOffset < -DELETE_ACTIONS_WIDTH * SWIPE_COMMIT_RATIO * 0.9) {
+        // 左滑到底：直接跳出刪除確認卡片
+        card.style.transform = "";
+        openSwipeCard = null;
+        openSwipeDirection = null;
+        if (project) confirmDeleteProject(project);
+      } else if (finalOffset > PIN_ACTION_WIDTH / 2) {
+        card.style.transform = `translateX(${PIN_ACTION_WIDTH}px)`;
         if (openSwipeCard && openSwipeCard !== card) closeSwipeCard(openSwipeCard);
         openSwipeCard = card;
-      } else if (openSwipeCard === card) {
-        openSwipeCard = null;
+        openSwipeDirection = "right";
+      } else if (finalOffset < -DELETE_ACTIONS_WIDTH / 2) {
+        card.style.transform = `translateX(-${DELETE_ACTIONS_WIDTH}px)`;
+        if (openSwipeCard && openSwipeCard !== card) closeSwipeCard(openSwipeCard);
+        openSwipeCard = card;
+        openSwipeDirection = "left";
+      } else {
+        card.style.transform = "";
+        if (openSwipeCard === card) {
+          openSwipeCard = null;
+          openSwipeDirection = null;
+        }
       }
     } else if (openSwipeCard === card) {
       closeSwipeCard(card);
       openSwipeCard = null;
+      openSwipeDirection = null;
     } else if (openSwipeCard) {
       closeSwipeCard(openSwipeCard);
       openSwipeCard = null;
+      openSwipeDirection = null;
     } else {
       navigate("project/" + wrap.dataset.id);
     }
