@@ -18,6 +18,7 @@ import {
   doc,
   addDoc,
   updateDoc,
+  deleteDoc,
   getDoc,
   onSnapshot,
   query,
@@ -70,6 +71,9 @@ const state = {
   projects: [],
   projectsUnsub: null,
 };
+
+// 首頁排序模式（僅存於記憶體，重新整理後回到預設值）
+let homeSortMode = "date-desc";
 
 const appEl = document.getElementById("app");
 
@@ -137,6 +141,7 @@ const ICONS = {
   grip: `<svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="9" cy="18" r="1.2"/><circle cx="15" cy="6" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="15" cy="18" r="1.2"/></svg>`,
   spotifyDot: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="color:var(--spotify); width:0.6em; height:0.6em; vertical-align:0;"><circle cx="12" cy="12" r="12"/></svg>`,
   edit: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`,
+  pin: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 2l1.5 5.5L19 9l-4 4 1 7-4-3.5L8 20l1-7-4-4 5.5-1.5Z"/></svg>`,
   copy: `<svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
 };
 
@@ -311,11 +316,41 @@ function renderLogin() {
 // 畫面：首頁（演出專案列表）
 // ----------------------------------------------------------------------------
 
+const SWIPE_ACTIONS_WIDTH = 192; // 三個操作按鈕（各 64px）的總寬度
+let openSwipeCard = null;
+
+function getHomeSortComparator(mode) {
+  const dateVal = (p) => p.date || "";
+  const createdVal = (p) => p.createdAt?.toMillis?.() ?? 0;
+  switch (mode) {
+    case "date-asc":
+      return (a, b) => dateVal(a).localeCompare(dateVal(b));
+    case "created-desc":
+      return (a, b) => createdVal(b) - createdVal(a);
+    case "created-asc":
+      return (a, b) => createdVal(a) - createdVal(b);
+    case "date-desc":
+    default:
+      return (a, b) => dateVal(b).localeCompare(dateVal(a));
+  }
+}
+
+// 置頂項目排除排序、永遠在最前面；其餘項目依目前選擇的排序模式排列
+function sortProjectsForHome(projects) {
+  const cmp = getHomeSortComparator(homeSortMode);
+  const pinned = projects.filter((p) => p.pinned).sort(cmp);
+  const rest = projects.filter((p) => !p.pinned).sort(cmp);
+  return [...pinned, ...rest];
+}
+
 function renderHome() {
   const user = state.user;
+  openSwipeCard = null;
 
-  const listHTML = state.projects.length
-    ? state.projects
+  const sortedProjects = sortProjectsForHome(state.projects);
+
+  const listHTML = sortedProjects.length
+    ? sortedProjects
         .map((p) => {
           const tagsHTML = (p.tags || [])
             .map((t) => `<span class="tag">${escapeHTML(t)}</span>`)
@@ -325,21 +360,36 @@ function renderHome() {
             ? `<span class="badge badge-warning">待同步</span>`
             : `<span class="badge badge-success">已同步</span>`;
           return h`
-            <button class="project-card" data-id="${p.id}">
-              <div class="project-card-top">
-                <div>
-                  <p class="project-card-name">${escapeHTML(p.name || "未命名演出")}</p>
-                  <p class="project-card-meta">${fmtDate(p.date)}${
+            <div class="project-card-wrap" data-id="${p.id}">
+              <div class="project-card-actions">
+                <button type="button" class="pca-btn pca-pin" data-action="pin" data-id="${p.id}">
+                  ${ICONS.pin}${p.pinned ? "取消置頂" : "置頂"}
+                </button>
+                <button type="button" class="pca-btn pca-copy" data-action="copy" data-id="${p.id}">
+                  ${ICONS.copy}複製
+                </button>
+                <button type="button" class="pca-btn pca-delete" data-action="delete" data-id="${p.id}">
+                  ${ICONS.close}刪除
+                </button>
+              </div>
+              <button class="project-card" data-id="${p.id}">
+                <div class="project-card-top">
+                  <div>
+                    <p class="project-card-name">${
+                      p.pinned ? ICONS.pin + " " : ""
+                    }${escapeHTML(p.name || "未命名演出")}</p>
+                    <p class="project-card-meta">${fmtDate(p.date)}${
             p.location ? " ・ " + escapeHTML(p.location) : ""
           }</p>
+                  </div>
+                  ${statusBadge}
                 </div>
-                ${statusBadge}
-              </div>
-              <div class="project-card-tags">
-                ${tagsHTML}
-                <span class="tag">${songCount}首</span>
-              </div>
-            </button>
+                <div class="project-card-tags">
+                  ${tagsHTML}
+                  <span class="tag">${songCount}首</span>
+                </div>
+              </button>
+            </div>
           `;
         })
         .join("")
@@ -370,13 +420,22 @@ function renderHome() {
         <input type="text" id="project-search" placeholder="搜尋演出名稱、地點" />
       </div>
 
+      <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+        <select id="sort-select" style="width:auto; font-size:12px; padding:7px 10px;">
+          <option value="date-desc">演出日期：新到舊</option>
+          <option value="date-asc">演出日期：舊到新</option>
+          <option value="created-desc">新增時間：新到舊</option>
+          <option value="created-asc">新增時間：舊到新</option>
+        </select>
+      </div>
+
       <div class="project-list" id="project-list">
         ${listHTML}
       </div>
 
       <div class="fab-container">
         <button class="btn btn-primary" id="new-project-btn">
-          ${ICONS.plus} 新增演出
+          ${ICONS.plus} 新增活動
         </button>
       </div>
     </div>
@@ -390,19 +449,183 @@ function renderHome() {
     navigate("settings");
   });
 
-  document.querySelectorAll(".project-card").forEach((el) => {
-    el.addEventListener("click", () => {
-      navigate("project/" + el.dataset.id);
+  const sortSelect = document.getElementById("sort-select");
+  sortSelect.value = homeSortMode;
+  sortSelect.addEventListener("change", () => {
+    homeSortMode = sortSelect.value;
+    renderHome();
+  });
+
+  document.querySelectorAll(".project-card-wrap").forEach((wrap) => {
+    attachSwipeHandlers(wrap);
+  });
+
+  document.querySelectorAll(".pca-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const project = state.projects.find((p) => p.id === btn.dataset.id);
+      if (!project) return;
+      if (btn.dataset.action === "pin") toggleProjectPinned(project);
+      else if (btn.dataset.action === "copy") duplicateProject(project);
+      else if (btn.dataset.action === "delete") confirmDeleteProject(project);
     });
   });
 
   const searchInput = document.getElementById("project-search");
   searchInput.addEventListener("input", () => {
     const kw = searchInput.value.trim().toLowerCase();
-    document.querySelectorAll(".project-card").forEach((el) => {
-      const text = el.textContent.toLowerCase();
-      el.style.display = text.includes(kw) ? "" : "none";
+    document.querySelectorAll(".project-card-wrap").forEach((wrap) => {
+      const text = wrap.textContent.toLowerCase();
+      wrap.style.display = text.includes(kw) ? "" : "none";
     });
+  });
+}
+
+function closeSwipeCard(card) {
+  card.style.transition = "transform 0.2s ease";
+  card.style.transform = "";
+}
+
+// 卡片左滑顯示操作按鈕：偵測到明顯的水平拖曳才攔截，垂直方向的手勢一律放行
+// 給頁面捲動；輕點（未觸發滑動判定）則視為一般點擊進入詳情頁
+function attachSwipeHandlers(wrap) {
+  const card = wrap.querySelector(".project-card");
+  let ctx = null;
+
+  card.addEventListener("pointerdown", (e) => {
+    ctx = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startOffset: openSwipeCard === card ? -SWIPE_ACTIONS_WIDTH : 0,
+      decided: false,
+      isSwipe: false,
+    };
+  });
+
+  card.addEventListener("pointermove", (e) => {
+    if (!ctx) return;
+    const dx = e.clientX - ctx.startX;
+    const dy = e.clientY - ctx.startY;
+    if (!ctx.decided) {
+      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+        ctx.decided = true;
+        ctx.isSwipe = Math.abs(dx) > Math.abs(dy);
+        if (ctx.isSwipe) {
+          card.setPointerCapture(e.pointerId);
+          card.style.transition = "none";
+        }
+      }
+    }
+    if (ctx.decided && ctx.isSwipe) {
+      const offset = Math.min(0, Math.max(-SWIPE_ACTIONS_WIDTH, ctx.startOffset + dx));
+      card.style.transform = `translateX(${offset}px)`;
+    }
+  });
+
+  card.addEventListener("pointerup", (e) => {
+    if (!ctx) return;
+    if (ctx.decided && ctx.isSwipe) {
+      const dx = e.clientX - ctx.startX;
+      const finalOffset = ctx.startOffset + dx;
+      const shouldOpen = finalOffset < -SWIPE_ACTIONS_WIDTH / 2;
+      card.style.transition = "transform 0.2s ease";
+      card.style.transform = shouldOpen ? `translateX(-${SWIPE_ACTIONS_WIDTH}px)` : "";
+      if (shouldOpen) {
+        if (openSwipeCard && openSwipeCard !== card) closeSwipeCard(openSwipeCard);
+        openSwipeCard = card;
+      } else if (openSwipeCard === card) {
+        openSwipeCard = null;
+      }
+    } else if (openSwipeCard === card) {
+      closeSwipeCard(card);
+      openSwipeCard = null;
+    } else if (openSwipeCard) {
+      closeSwipeCard(openSwipeCard);
+      openSwipeCard = null;
+    } else {
+      navigate("project/" + wrap.dataset.id);
+    }
+    ctx = null;
+  });
+
+  card.addEventListener("pointercancel", () => {
+    ctx = null;
+  });
+}
+
+async function toggleProjectPinned(project) {
+  try {
+    await updateDoc(doc(db, "users", state.user.uid, "projects", project.id), {
+      pinned: !project.pinned,
+    });
+  } catch (err) {
+    console.error(err);
+    showToast("更新置頂狀態失敗", true);
+  }
+}
+
+async function duplicateProject(project) {
+  try {
+    const payload = {
+      name: project.name,
+      date: project.date || "",
+      band: project.band || "",
+      eventName: project.eventName || "",
+      location: project.location || "",
+      tags: project.tags || [],
+      note: project.note || "",
+      nameMode: project.nameMode || "auto",
+      autoFields: project.autoFields || [],
+      customName: project.customName || "",
+      songs: project.songs || [],
+      pinned: false,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+    const colRef = collection(db, "users", state.user.uid, "projects");
+    await addDoc(colRef, payload);
+    showToast("已複製活動");
+  } catch (err) {
+    console.error(err);
+    showToast("複製失敗，請稍後再試", true);
+  }
+}
+
+function confirmDeleteProject(project) {
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  overlay.innerHTML = h`
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <span class="modal-title">刪除活動</span>
+        <button type="button" class="btn-icon" id="modal-close-btn">${ICONS.close}</button>
+      </div>
+      <p style="font-size:13px; color:var(--text-secondary); margin:0 0 16px;">
+        確定要刪除「${escapeHTML(project.name || "未命名演出")}」嗎？此操作無法復原。
+      </p>
+      <div style="display:flex; gap:8px;">
+        <button type="button" class="btn btn-secondary" id="cancel-delete-btn" style="flex:1;">取消</button>
+        <button type="button" class="btn" id="confirm-delete-btn" style="flex:1; background:var(--danger); color:#fff;">刪除</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) close();
+  });
+  overlay.querySelector("#modal-close-btn").addEventListener("click", close);
+  overlay.querySelector("#cancel-delete-btn").addEventListener("click", close);
+  overlay.querySelector("#confirm-delete-btn").addEventListener("click", async () => {
+    close();
+    try {
+      await deleteDoc(doc(db, "users", state.user.uid, "projects", project.id));
+      showToast("已刪除活動");
+    } catch (err) {
+      console.error(err);
+      showToast("刪除失敗，請稍後再試", true);
+    }
   });
 }
 
@@ -554,7 +777,7 @@ function renderProjectForm(existing) {
     <div class="page">
       <div class="topbar">
         <button class="btn-icon" id="back-btn">${ICONS.arrowLeft}</button>
-        <span class="topbar-title">${isEdit ? "編輯演出資訊" : "新增演出"}</span>
+        <span class="topbar-title">${isEdit ? "編輯演出資訊" : "新增活動"}</span>
       </div>
 
       <div class="form-group">
@@ -564,23 +787,17 @@ function renderProjectForm(existing) {
 
       <div class="form-group">
         <label class="form-label">樂團</label>
-        <input type="text" id="f-band" placeholder="樂團名稱" value="${escapeAttr(
-          form.band
-        )}" />
+        <input type="text" id="f-band" value="${escapeAttr(form.band)}" />
       </div>
 
       <div class="form-group">
         <label class="form-label">活動名稱</label>
-        <input type="text" id="f-eventName" placeholder="例：河岸留言專場" value="${escapeAttr(
-          form.eventName
-        )}" />
+        <input type="text" id="f-eventName" value="${escapeAttr(form.eventName)}" />
       </div>
 
       <div class="form-group">
         <label class="form-label">地點</label>
-        <input type="text" id="f-location" placeholder="例：台北河岸留言" value="${escapeAttr(
-          form.location
-        )}" />
+        <input type="text" id="f-location" value="${escapeAttr(form.location)}" />
       </div>
 
       <div class="form-group">
@@ -590,9 +807,7 @@ function renderProjectForm(existing) {
 
       <div class="form-group">
         <label class="form-label">備註</label>
-        <textarea id="f-note" placeholder="舞台配置、演出注意事項...">${escapeHTML(
-          form.note
-        )}</textarea>
+        <textarea id="f-note">${escapeHTML(form.note)}</textarea>
       </div>
 
       <div class="form-group" style="border-top:1px solid var(--border); padding-top:14px;">
@@ -1078,8 +1293,15 @@ function cleanAlbumHint(section) {
   return (section || "").replace(/^\d+\.\s*/, "").trim();
 }
 
+// 觸覺回饋小工具：iOS Safari 沒有 Vibration API，此呼叫在 iOS 上會靜默無作用，
+// 在支援的裝置（如 Android Chrome）上才會真的震動
+function vibrateFeedback(ms) {
+  if (navigator.vibrate) navigator.vibrate(ms);
+}
+
 function addSongToSetlist(songDbEntry) {
   if (!editorState) return;
+  vibrateFeedback(15);
   const targetEditorState = editorState;
   const key = editorState.nextKey();
   editorState.songs.push({
@@ -1120,6 +1342,7 @@ async function matchOfflineSongWithSpotify(targetEditorState, key, songDbEntry) 
 
 function addSpotifyTrackToSetlist(track) {
   if (!editorState) return;
+  vibrateFeedback(15);
   editorState.songs.push({
     key: editorState.nextKey(),
     name: track.name,
@@ -1376,8 +1599,9 @@ function renderSongsList() {
 let dragCtx = null;
 let pendingPress = null;
 
-const LONG_PRESS_MS = 500; // 與 iOS 原生長按判斷時長一致
+const LONG_PRESS_MS = 300;
 const PRESS_MOVE_CANCEL_PX = 10; // 長按計時中若手指移動超過此距離，視為滑動而非拖曳意圖
+const DRAG_SCALE = 1.04; // 拖曳觸發時卡片微幅放大的比例
 
 // 拖曳排序：需先長按觸發（避免誤觸），啟動後拖曳中的列直接用 transform 跟著手指位置
 // 即時移動，其餘列則平移讓出空位，放開後才真正重新排列 DOM／資料
@@ -1457,15 +1681,16 @@ function startDrag(row, container, startClientY) {
 
   row.classList.add("dragging");
   row.style.transition = "none";
+  row.style.transform = `scale(${DRAG_SCALE})`;
   document.body.classList.add("no-select");
-  if (navigator.vibrate) navigator.vibrate(10); // iOS Safari 不支援 Vibration API，此行在 iOS 上不會有作用
+  vibrateFeedback(10);
 }
 
 function updateDrag(clientY) {
   if (!dragCtx) return;
   const { row, rows, rects, startIndex, rowHeight } = dragCtx;
   const deltaY = clientY - dragCtx.startClientY;
-  row.style.transform = `translateY(${deltaY}px)`;
+  row.style.transform = `translateY(${deltaY}px) scale(${DRAG_SCALE})`;
 
   const draggedCenter = rects[startIndex].top + rects[startIndex].height / 2 + deltaY;
   let newIndex = 0;
@@ -1474,6 +1699,9 @@ function updateDrag(clientY) {
     const otherCenter = rect.top + rect.height / 2;
     if (otherCenter < draggedCenter) newIndex++;
   });
+  if (newIndex !== dragCtx.currentIndex) {
+    vibrateFeedback(8); // 拖曳中每經過一首歌給一次短震動
+  }
   dragCtx.currentIndex = newIndex;
 
   rows.forEach((r, i) => {
