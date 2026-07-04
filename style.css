@@ -415,7 +415,9 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   top: 0;
   left: 0;
   height: 100%;
+  width: 0;
   display: flex;
+  overflow: hidden;
 }
 
 .project-card-actions-right {
@@ -423,11 +425,12 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   top: 0;
   right: 0;
   height: 100%;
+  width: 0;
   display: flex;
+  overflow: hidden;
 }
 
 .pca-btn {
-  width: 72px;
   height: 100%;
   border: none;
   color: #fff;
@@ -437,7 +440,8 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  flex-shrink: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .pca-pin {

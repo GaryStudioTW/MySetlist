@@ -316,9 +316,10 @@ function renderLogin() {
 // 畫面：首頁（演出專案列表）
 // ----------------------------------------------------------------------------
 
-const PIN_ACTION_WIDTH = 72; // 右滑露出的置頂按鈕寬度
-const DELETE_ACTIONS_WIDTH = 144; // 左滑露出的複製＋刪除按鈕總寬度
-const SWIPE_COMMIT_RATIO = 1.5; // 滑動超過按鈕寬度的這個倍數，視為「滑到底」直接觸發動作
+const PIN_ACTION_MIN_WIDTH = 72; // 靜止展開（未觸發動作）時的置頂按鈕寬度
+const DELETE_ACTIONS_MIN_WIDTH = 144; // 靜止展開時的複製＋刪除按鈕總寬度
+const SWIPE_COMMIT_RATIO = 0.7; // 滑動超過卡片寬度的這個比例，直接觸發動作
+const SWIPE_MAX_RATIO = 0.85; // 拖曳視覺上最多允許到卡片寬度的這個比例（給一點回彈手感）
 let openSwipeCard = null;
 let openSwipeDirection = null; // "left" 或 "right"，記錄目前展開的卡片是哪一側
 
@@ -487,21 +488,45 @@ function renderHome() {
   });
 }
 
+function setSwipePanelWidths(wrap, offset) {
+  const leftPanel = wrap.querySelector(".project-card-actions-left");
+  const rightPanel = wrap.querySelector(".project-card-actions-right");
+  if (offset >= 0) {
+    leftPanel.style.width = `${offset}px`;
+    rightPanel.style.width = "0px";
+  } else {
+    rightPanel.style.width = `${-offset}px`;
+    leftPanel.style.width = "0px";
+  }
+}
+
 function closeSwipeCard(card) {
   card.style.transition = "transform 0.2s ease";
   card.style.transform = "";
+  const wrap = card.closest(".project-card-wrap");
+  if (wrap) {
+    const leftPanel = wrap.querySelector(".project-card-actions-left");
+    const rightPanel = wrap.querySelector(".project-card-actions-right");
+    leftPanel.style.transition = "width 0.2s ease";
+    rightPanel.style.transition = "width 0.2s ease";
+    leftPanel.style.width = "0px";
+    rightPanel.style.width = "0px";
+  }
 }
 
-// 卡片雙向滑動：右滑露出置頂（滑到底直接切換置頂狀態），左滑露出複製／刪除
-// （滑到底直接跳出刪除確認）。只偵測到明顯的水平拖曳才攔截，垂直方向的手勢
-// 一律放行給頁面捲動；輕點（未觸發滑動判定）則視為一般點擊進入詳情頁
+// 卡片雙向滑動：右滑露出置頂（滑到卡片寬度 70% 直接切換置頂狀態），左滑露出
+// 複製／刪除（滑到 70% 直接跳出刪除確認）。拖曳中色塊寬度即時跟著手指位置
+// 變化，放開後才 snap 回固定展開寬度、關閉，或直接觸發動作。只偵測到明顯的
+// 水平拖曳才攔截，垂直方向的手勢一律放行給頁面捲動；輕點則視為一般點擊
 function attachSwipeHandlers(wrap) {
   const card = wrap.querySelector(".project-card");
+  const leftPanel = wrap.querySelector(".project-card-actions-left");
+  const rightPanel = wrap.querySelector(".project-card-actions-right");
   let ctx = null;
 
   function currentOpenOffset() {
     if (openSwipeCard !== card) return 0;
-    return openSwipeDirection === "right" ? PIN_ACTION_WIDTH : -DELETE_ACTIONS_WIDTH;
+    return openSwipeDirection === "right" ? PIN_ACTION_MIN_WIDTH : -DELETE_ACTIONS_MIN_WIDTH;
   }
 
   card.addEventListener("pointerdown", (e) => {
@@ -509,6 +534,7 @@ function attachSwipeHandlers(wrap) {
       startX: e.clientX,
       startY: e.clientY,
       startOffset: currentOpenOffset(),
+      cardWidth: card.getBoundingClientRect().width,
       decided: false,
       isSwipe: false,
     };
@@ -525,14 +551,16 @@ function attachSwipeHandlers(wrap) {
         if (ctx.isSwipe) {
           card.setPointerCapture(e.pointerId);
           card.style.transition = "none";
+          leftPanel.style.transition = "none";
+          rightPanel.style.transition = "none";
         }
       }
     }
     if (ctx.decided && ctx.isSwipe) {
-      const maxRight = PIN_ACTION_WIDTH * SWIPE_COMMIT_RATIO;
-      const maxLeft = -DELETE_ACTIONS_WIDTH * SWIPE_COMMIT_RATIO;
-      const offset = Math.min(maxRight, Math.max(maxLeft, ctx.startOffset + dx));
+      const maxAbs = ctx.cardWidth * SWIPE_MAX_RATIO;
+      const offset = Math.min(maxAbs, Math.max(-maxAbs, ctx.startOffset + dx));
       card.style.transform = `translateX(${offset}px)`;
+      setSwipePanelWidths(wrap, offset);
     }
   });
 
@@ -541,33 +569,42 @@ function attachSwipeHandlers(wrap) {
     if (ctx.decided && ctx.isSwipe) {
       const dx = e.clientX - ctx.startX;
       const finalOffset = ctx.startOffset + dx;
+      const commitDistance = ctx.cardWidth * SWIPE_COMMIT_RATIO;
       const project = state.projects.find((p) => p.id === wrap.dataset.id);
-      card.style.transition = "transform 0.2s ease";
 
-      if (finalOffset > PIN_ACTION_WIDTH * SWIPE_COMMIT_RATIO * 0.9) {
+      card.style.transition = "transform 0.2s ease";
+      leftPanel.style.transition = "width 0.2s ease";
+      rightPanel.style.transition = "width 0.2s ease";
+
+      if (finalOffset > commitDistance) {
         // 右滑到底：直接切換置頂狀態
         card.style.transform = "";
+        setSwipePanelWidths(wrap, 0);
         openSwipeCard = null;
         openSwipeDirection = null;
         if (project) toggleProjectPinned(project);
-      } else if (finalOffset < -DELETE_ACTIONS_WIDTH * SWIPE_COMMIT_RATIO * 0.9) {
+      } else if (finalOffset < -commitDistance) {
         // 左滑到底：直接跳出刪除確認卡片
         card.style.transform = "";
+        setSwipePanelWidths(wrap, 0);
         openSwipeCard = null;
         openSwipeDirection = null;
         if (project) confirmDeleteProject(project);
-      } else if (finalOffset > PIN_ACTION_WIDTH / 2) {
-        card.style.transform = `translateX(${PIN_ACTION_WIDTH}px)`;
+      } else if (finalOffset > PIN_ACTION_MIN_WIDTH / 2) {
+        card.style.transform = `translateX(${PIN_ACTION_MIN_WIDTH}px)`;
+        setSwipePanelWidths(wrap, PIN_ACTION_MIN_WIDTH);
         if (openSwipeCard && openSwipeCard !== card) closeSwipeCard(openSwipeCard);
         openSwipeCard = card;
         openSwipeDirection = "right";
-      } else if (finalOffset < -DELETE_ACTIONS_WIDTH / 2) {
-        card.style.transform = `translateX(-${DELETE_ACTIONS_WIDTH}px)`;
+      } else if (finalOffset < -DELETE_ACTIONS_MIN_WIDTH / 2) {
+        card.style.transform = `translateX(-${DELETE_ACTIONS_MIN_WIDTH}px)`;
+        setSwipePanelWidths(wrap, -DELETE_ACTIONS_MIN_WIDTH);
         if (openSwipeCard && openSwipeCard !== card) closeSwipeCard(openSwipeCard);
         openSwipeCard = card;
         openSwipeDirection = "left";
       } else {
         card.style.transform = "";
+        setSwipePanelWidths(wrap, 0);
         if (openSwipeCard === card) {
           openSwipeCard = null;
           openSwipeDirection = null;
