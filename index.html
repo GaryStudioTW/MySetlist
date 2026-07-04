@@ -13,6 +13,13 @@
   <div class="center-loading"><div class="spinner"></div></div>
 </div>
 
+<!-- 實驗性 iOS Haptic Touch：Safari 17.4+ 對原生 switch 外觀的 checkbox 有觸覺回饋，
+     透過點擊關聯的 label 觸發；放在 #app 外面才不會被畫面重繪清掉。
+     只在真正的使用者點擊事件裡呼叫才有機會生效，Safari 26.5 之後可能已失效，
+     其他瀏覽器會忽略 switch 屬性、不會有作用也不影響功能 -->
+<input type="checkbox" id="haptic-switch" switch style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none;" />
+<label for="haptic-switch" id="haptic-switch-label" style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none;"></label>
+
 <script type="module" src="app.js"></script>
 </body>
 </html>

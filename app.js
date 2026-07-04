@@ -141,7 +141,7 @@ const ICONS = {
   grip: `<svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="9" cy="18" r="1.2"/><circle cx="15" cy="6" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="15" cy="18" r="1.2"/></svg>`,
   spotifyDot: `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="color:var(--spotify); width:0.6em; height:0.6em; vertical-align:0;"><circle cx="12" cy="12" r="12"/></svg>`,
   edit: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`,
-  pin: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 2l1.5 5.5L19 9l-4 4 1 7-4-3.5L8 20l1-7-4-4 5.5-1.5Z"/></svg>`,
+  pin: `<svg class="icon" viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-11a7 7 0 0 0-14 0c0 4.5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>`,
   copy: `<svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
 };
 
@@ -1299,9 +1299,19 @@ function vibrateFeedback(ms) {
   if (navigator.vibrate) navigator.vibrate(ms);
 }
 
+// 實驗性 iOS Haptic Touch：點擊 index.html 裡那個隱藏的 switch label 觸發。
+// 這只是 Safari 17.4+ 對「原生 switch 外觀 checkbox」的副作用，不是正式 API，
+// 且必須是真正的使用者點擊事件才有機會生效（在 setTimeout／pointermove 裡呼叫
+// 幾乎一定不會有效果），Safari 26.5 之後也可能已經被修補掉，其他瀏覽器則完全無感
+function triggerHapticTouch() {
+  const label = document.getElementById("haptic-switch-label");
+  if (label) label.click();
+}
+
 function addSongToSetlist(songDbEntry) {
   if (!editorState) return;
   vibrateFeedback(15);
+  triggerHapticTouch();
   const targetEditorState = editorState;
   const key = editorState.nextKey();
   editorState.songs.push({
@@ -1343,6 +1353,7 @@ async function matchOfflineSongWithSpotify(targetEditorState, key, songDbEntry) 
 function addSpotifyTrackToSetlist(track) {
   if (!editorState) return;
   vibrateFeedback(15);
+  triggerHapticTouch();
   editorState.songs.push({
     key: editorState.nextKey(),
     name: track.name,
@@ -1684,6 +1695,7 @@ function startDrag(row, container, startClientY) {
   row.style.transform = `scale(${DRAG_SCALE})`;
   document.body.classList.add("no-select");
   vibrateFeedback(10);
+  triggerHapticTouch();
 }
 
 function updateDrag(clientY) {
@@ -1701,6 +1713,7 @@ function updateDrag(clientY) {
   });
   if (newIndex !== dragCtx.currentIndex) {
     vibrateFeedback(8); // 拖曳中每經過一首歌給一次短震動
+    triggerHapticTouch();
   }
   dragCtx.currentIndex = newIndex;
 

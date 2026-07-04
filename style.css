@@ -93,6 +93,11 @@ input, textarea, select {
   transition: border-color 0.15s ease;
 }
 
+/* 日期欄位維持瀏覽器原生寬度，不在加寬範圍內 */
+input[type="date"] {
+  width: auto;
+}
+
 input:focus, textarea:focus, select:focus {
   border-color: var(--accent);
 }
