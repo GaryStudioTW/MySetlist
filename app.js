@@ -1107,6 +1107,7 @@ function renderProjectDetail(project) {
               m.label
             )}">${ICONS.plus} ${escapeHTML(m.label)}</button>`
         ).join("")}
+        <button type="button" class="chip-btn" id="segment-marker-custom-btn">${ICONS.plus} 自訂</button>
       </div>
 
       <div class="song-list" id="selected-songs-list"></div>
@@ -1138,9 +1139,12 @@ function renderProjectDetail(project) {
   document
     .getElementById("copy-social-btn")
     .addEventListener("click", () => copySocialText(project));
-  document.querySelectorAll("#segment-marker-row .chip-btn").forEach((btn) => {
+  document.querySelectorAll("#segment-marker-row .chip-btn[data-marker-label]").forEach((btn) => {
     btn.addEventListener("click", () => addMarkerToSetlist(btn.dataset.markerLabel));
   });
+  document
+    .getElementById("segment-marker-custom-btn")
+    .addEventListener("click", openCustomMarkerModal);
 
   renderSongsList();
   initSongBrowser();
@@ -1496,6 +1500,54 @@ function addMarkerToSetlist(label) {
   });
   renderSongsList();
   persistSongs();
+}
+
+// 自訂段落標記：跳出小視窗讓使用者輸入文字，確認後跟固定標記一樣加入歌單
+function openCustomMarkerModal() {
+  if (!editorState) return;
+
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  overlay.innerHTML = h`
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <span class="modal-title">自訂段落標記</span>
+        <button type="button" class="btn-icon" id="modal-close-btn">${ICONS.close}</button>
+      </div>
+      <div class="form-group">
+        <input type="text" id="custom-marker-input" placeholder="輸入標記文字，例如：安可 Encore" maxlength="20" />
+      </div>
+      <button type="button" class="btn btn-primary" id="confirm-custom-marker-btn">新增標記</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) close();
+  });
+  overlay.querySelector("#modal-close-btn").addEventListener("click", close);
+
+  const input = overlay.querySelector("#custom-marker-input");
+  input.focus();
+
+  const confirm = () => {
+    const label = input.value.trim();
+    if (!label) {
+      input.focus();
+      return;
+    }
+    addMarkerToSetlist(label);
+    close();
+  };
+
+  overlay.querySelector("#confirm-custom-marker-btn").addEventListener("click", confirm);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      confirm();
+    }
+  });
 }
 
 // 段落標記在複製文字中的呈現格式暫定為「【標記】」，待確認正式的社群文字格式後再調整
