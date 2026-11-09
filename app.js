@@ -33,6 +33,7 @@ import {
   getSpotifyProfile,
   searchSpotifyTracks,
   findBestTrackMatch,
+  normalizeForCompare,
   getUserPlaylists,
   addTracksToPlaylist,
 } from "./spotify.js";
@@ -1552,9 +1553,46 @@ function openCustomMarkerModal() {
   });
 }
 
+// 從 Spotify 搜尋加入的歌曲存的是 Spotify 上的歌名，社群文字要用自己資料庫的歌名：
+// 拿 Spotify 歌名去比對資料庫的中文／英文歌名（去除標點、大小寫後需完全相同），
+// 同名歌曲出現在多張專輯時優先挑專輯名稱也對得上的；資料庫查不到就維持原本的歌名
+function getSocialSongName(song, songsDB) {
+  if (song.source !== "spotify") return song.name;
+
+  const key = normalizeForCompare(song.name);
+  if (!key) return song.name;
+  const candidates = songsDB.filter(
+    (e) =>
+      normalizeForCompare(e.name) === key ||
+      (e.nameEn && normalizeForCompare(e.nameEn) === key)
+  );
+  if (!candidates.length) return song.name;
+
+  const albumKey = normalizeForCompare(song.album);
+  const albumMatched = albumKey
+    ? candidates.find(
+        (e) =>
+          normalizeForCompare(cleanAlbumHint(e.section)) === albumKey ||
+          normalizeForCompare(e.sectionEn) === albumKey
+      )
+    : null;
+  return (albumMatched || candidates[0]).name;
+}
+
 // 段落標記在複製文字中的呈現格式暫定為「【標記】」，待確認正式的社群文字格式後再調整
 async function copySocialText(project) {
   if (!editorState) return;
+
+  // 只有歌單含 Spotify 來源的歌曲才需要資料庫（避免多等一次非同步而讓 iOS 剪貼簿失去使用者操作權限）；
+  // 資料庫載入失敗（離線又沒有快取）時不擋住複製，直接沿用歌單裡的歌名
+  let songsDB = [];
+  if (editorState.songs.some((s) => s.source === "spotify")) {
+    try {
+      songsDB = await loadSongsDB();
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   let songNum = 0;
   const songLines = [];
@@ -1565,7 +1603,7 @@ async function copySocialText(project) {
       return;
     }
     songNum++;
-    songLines.push(`${songNum}. ${s.name}`);
+    songLines.push(`${songNum}. ${getSocialSongName(s, songsDB)}`);
   });
 
   const blocks = [project.name || "", songLines.join("\n")];

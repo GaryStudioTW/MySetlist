@@ -222,7 +222,7 @@ export async function searchSpotifyTracks(query, limit = 10) {
 
 // 去除標點符號、空白後轉小寫再比對是否互相包含，避免歌名／專輯名稱因為標點、
 // 括號、副標題等細微差異（例如彎引號 vs 直引號）就完全比對不到
-function normalizeForCompare(str) {
+export function normalizeForCompare(str) {
   return (str || "")
     .toLowerCase()
     .replace(/[^\p{L}\p{N}]/gu, "");
