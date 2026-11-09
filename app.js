@@ -1674,7 +1674,6 @@ async function runAddToSpotifyPlaylist(playlistId, bodyEl, close) {
 
   const uris = [];
   let unmatched = 0;
-  let notReleased = 0; // 串流尚未上架、刻意跳過比對的歌曲數
 
   for (let i = 0; i < songs.length; i++) {
     const s = songs[i];
@@ -1682,7 +1681,7 @@ async function runAddToSpotifyPlaylist(playlistId, bodyEl, close) {
       if (s.spotifyUri) {
         uris.push(s.spotifyUri);
       } else if (findOfflineSongEntry(s.name, s.section)?.skipSpotify) {
-        notReleased++;
+        // 串流尚未上架的歌曲直接略過，不比對也不計入「找不到」
       } else {
         const dbEntry = findOfflineSongEntry(s.name, s.section);
         const match = await findBestTrackMatch(
@@ -1703,23 +1702,16 @@ async function runAddToSpotifyPlaylist(playlistId, bodyEl, close) {
   }
 
   if (!uris.length) {
-    bodyEl.innerHTML = `<p style="font-size:13px; color:var(--text-secondary);">${
-      notReleased && !unmatched
-        ? `這份歌單的歌曲尚未在 Spotify 上架（${notReleased} 首）`
-        : "找不到任何相符的 Spotify 歌曲"
-    }</p>`;
+    bodyEl.innerHTML = `<p style="font-size:13px; color:var(--text-secondary);">找不到任何相符的 Spotify 歌曲</p>`;
     return;
   }
 
   try {
     await addTracksToPlaylist(playlistId, uris);
     close();
-    const notes = [];
-    if (unmatched) notes.push(`${unmatched} 首找不到相符歌曲`);
-    if (notReleased) notes.push(`${notReleased} 首尚未上架`);
     showToast(
-      notes.length
-        ? `已加入 ${uris.length} 首，${notes.join("、")}`
+      unmatched
+        ? `已加入 ${uris.length} 首，${unmatched} 首找不到相符歌曲`
         : `已加入 ${uris.length} 首到播放清單`
     );
   } catch (err) {
