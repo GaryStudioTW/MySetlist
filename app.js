@@ -1555,28 +1555,37 @@ function openCustomMarkerModal() {
 
 // 從 Spotify 搜尋加入的歌曲存的是 Spotify 上的歌名，社群文字要用自己資料庫的歌名：
 // 拿 Spotify 歌名去比對資料庫的中文／英文歌名（去除標點、大小寫後需完全相同），
-// 同名歌曲出現在多張專輯時優先挑專輯名稱也對得上的；資料庫查不到就維持原本的歌名
+// 同名歌曲出現在多張專輯時優先挑專輯名稱也對得上的；
+// 資料庫查不到時，去掉 Spotify 歌名裡「 - 」之後的版本／備註（例如「最後一個 - Acoustic」、
+// 「今天的我 - 電影《冠軍之路》主題曲」只留前面的歌名）；只有一般「-」沒有空白的歌名不受影響
 function getSocialSongName(song, songsDB) {
   if (song.source !== "spotify") return song.name;
 
-  const key = normalizeForCompare(song.name);
-  if (!key) return song.name;
-  const candidates = songsDB.filter(
-    (e) =>
-      normalizeForCompare(e.name) === key ||
-      (e.nameEn && normalizeForCompare(e.nameEn) === key)
-  );
-  if (!candidates.length) return song.name;
-
+  const fullName = song.name || "";
+  const shortName = fullName.replace(/\s+[-–—]\s+.*$/, "").trim() || fullName;
   const albumKey = normalizeForCompare(song.album);
-  const albumMatched = albumKey
-    ? candidates.find(
-        (e) =>
-          normalizeForCompare(cleanAlbumHint(e.section)) === albumKey ||
-          normalizeForCompare(e.sectionEn) === albumKey
-      )
-    : null;
-  return (albumMatched || candidates[0]).name;
+
+  // 先用完整歌名比對（歌名本身就含「 - 」時才不會被誤切），比對不到再用去掉後綴的歌名
+  for (const name of shortName === fullName ? [fullName] : [fullName, shortName]) {
+    const key = normalizeForCompare(name);
+    if (!key) continue;
+    const candidates = songsDB.filter(
+      (e) =>
+        normalizeForCompare(e.name) === key ||
+        (e.nameEn && normalizeForCompare(e.nameEn) === key)
+    );
+    if (!candidates.length) continue;
+
+    const albumMatched = albumKey
+      ? candidates.find(
+          (e) =>
+            normalizeForCompare(cleanAlbumHint(e.section)) === albumKey ||
+            normalizeForCompare(e.sectionEn) === albumKey
+        )
+      : null;
+    return (albumMatched || candidates[0]).name;
+  }
+  return shortName;
 }
 
 // 段落標記在複製文字中的呈現格式暫定為「【標記】」，待確認正式的社群文字格式後再調整
