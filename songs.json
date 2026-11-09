@@ -740,6 +740,150 @@
         "sectionEn":  "Human Condition"
     },
     {
+        "name":  "Insert A Coin Feat. PUZZLEMAN",
+        "codes":  [
+                      "7-1",
+                      "Coin"
+                  ],
+        "lyric":  "",
+        "nameEn":  "Insert A Coin Feat. Puzzleman",
+        "section":  "07.你也是夢想家",
+        "sectionEn":  "START to have a dream",
+        "skipSpotify":  true
+    },
+    {
+        "name":  "Back To 99\u0027",
+        "codes":  [
+                      "7-2",
+                      "99"
+                  ],
+        "lyric":  "",
+        "nameEn":  "Back To 99\u0027",
+        "section":  "07.你也是夢想家",
+        "sectionEn":  "START to have a dream",
+        "skipSpotify":  true
+    },
+    {
+        "name":  "Boy (Cover Of 複製人RPDX)",
+        "codes":  [
+                      "7-3",
+                      "Boy"
+                  ],
+        "lyric":  "",
+        "nameEn":  "Boy (Cover Of RPDX)",
+        "section":  "07.你也是夢想家",
+        "sectionEn":  "START to have a dream",
+        "skipSpotify":  true
+    },
+    {
+        "name":  "眼淚無聲",
+        "codes":  [
+                      "7-4",
+                      "d4"
+                  ],
+        "lyric":  "",
+        "nameEn":  "My Broken Heart",
+        "section":  "07.你也是夢想家",
+        "sectionEn":  "START to have a dream",
+        "skipSpotify":  true
+    },
+    {
+        "name":  "流浪的路",
+        "codes":  [
+                      "7-5",
+                      "d5"
+                  ],
+        "lyric":  "",
+        "nameEn":  "So Please",
+        "section":  "07.你也是夢想家",
+        "sectionEn":  "START to have a dream",
+        "skipSpotify":  true
+    },
+    {
+        "name":  "決心離開",
+        "codes":  [
+                      "7-6",
+                      "d6"
+                  ],
+        "lyric":  "",
+        "nameEn":  "Decide To Leave",
+        "section":  "07.你也是夢想家",
+        "sectionEn":  "START to have a dream",
+        "skipSpotify":  true
+    },
+    {
+        "name":  "新歌七號",
+        "codes":  [
+                      "7-7",
+                      "n7"
+                  ],
+        "lyric":  "",
+        "nameEn":  "Fierce Winds, Strong Grass",
+        "section":  "07.你也是夢想家",
+        "sectionEn":  "START to have a dream",
+        "skipSpotify":  true
+    },
+    {
+        "name":  "Road Trip",
+        "codes":  [
+                      "7-8",
+                      "d8"
+                  ],
+        "lyric":  "",
+        "nameEn":  "Road Trip",
+        "section":  "07.你也是夢想家",
+        "sectionEn":  "START to have a dream",
+        "skipSpotify":  true
+    },
+    {
+        "name":  "陪你一關一關過",
+        "codes":  [
+                      "7-9",
+                      "Continue"
+                  ],
+        "lyric":  "",
+        "nameEn":  "Continue?",
+        "section":  "07.你也是夢想家",
+        "sectionEn":  "START to have a dream",
+        "skipSpotify":  true
+    },
+    {
+        "name":  "體會",
+        "codes":  [
+                      "7-10",
+                      "Enjoy"
+                  ],
+        "lyric":  "",
+        "nameEn":  "Enjoy Your Holiday",
+        "section":  "07.你也是夢想家",
+        "sectionEn":  "START to have a dream",
+        "skipSpotify":  true
+    },
+    {
+        "name":  "咱一定沒問題",
+        "codes":  [
+                      "7-11",
+                      "nop"
+                  ],
+        "lyric":  "",
+        "nameEn":  "Don\u0027t Give Up",
+        "section":  "07.你也是夢想家",
+        "sectionEn":  "START to have a dream",
+        "skipSpotify":  true
+    },
+    {
+        "name":  "夢想家 Feat.楊駝",
+        "codes":  [
+                      "7-12",
+                      "dreamer"
+                  ],
+        "lyric":  "",
+        "nameEn":  "Dreamer",
+        "section":  "07.你也是夢想家",
+        "sectionEn":  "START to have a dream",
+        "skipSpotify":  true
+    },
+    {
         "name":  "Song For You",
         "codes":  [
                       "SFY"
