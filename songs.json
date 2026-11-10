@@ -740,7 +740,7 @@
         "sectionEn":  "Human Condition"
     },
     {
-        "name":  "Insert A Coin Feat. PUZZLEMAN",
+        "name":  "Insert a coin Feat. PUZZLEMAN",
         "codes":  [
                       "7-1",
                       "Coin"
@@ -752,19 +752,19 @@
         "skipSpotify":  true
     },
     {
-        "name":  "Back To 99\u0027",
+        "name":  "BACK TO 99’",
         "codes":  [
                       "7-2",
                       "99"
                   ],
         "lyric":  "",
-        "nameEn":  "Back To 99\u0027",
+        "nameEn":  "BACK TO 99’",
         "section":  "07.你也是夢想家",
         "sectionEn":  "START to have a dream",
         "skipSpotify":  true
     },
     {
-        "name":  "Boy (Cover Of 複製人RPDX)",
+        "name":  "Boy（Cover of複製人RPDX）",
         "codes":  [
                       "7-3",
                       "Boy"
@@ -806,7 +806,7 @@
                       "d6"
                   ],
         "lyric":  "",
-        "nameEn":  "Decide To Leave",
+        "nameEn":  "Decide to Leave",
         "section":  "07.你也是夢想家",
         "sectionEn":  "START to have a dream",
         "skipSpotify":  true
@@ -842,7 +842,7 @@
                       "Continue"
                   ],
         "lyric":  "",
-        "nameEn":  "Continue?",
+        "nameEn":  "Dear My Friend",
         "section":  "07.你也是夢想家",
         "sectionEn":  "START to have a dream",
         "skipSpotify":  true
